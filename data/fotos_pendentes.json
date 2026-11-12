@@ -1,0 +1,86 @@
+[
+  {
+    "mineral": "Eastonita",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Heinrich T. Frank (UFRGS, 2018)",
+    "sourcePage": 35,
+    "author": "Heinrich T. Frank",
+    "license": "Uso não comercial",
+    "url": "",
+    "requiresInternet": "não",
+    "parentGroup": "Biotita"
+  },
+  {
+    "mineral": "Estilbita-Na",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Heinrich T. Frank (UFRGS, 2018)",
+    "sourcePage": 87,
+    "author": "Heinrich T. Frank",
+    "license": "Uso não comercial",
+    "url": "",
+    "requiresInternet": "não",
+    "parentGroup": "Estilbita"
+  },
+  {
+    "mineral": "Heulandita-K",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Heinrich T. Frank (UFRGS, 2018)",
+    "sourcePage": 113,
+    "author": "Heinrich T. Frank",
+    "license": "Uso não comercial",
+    "url": "",
+    "requiresInternet": "não",
+    "parentGroup": "Heulandita"
+  },
+  {
+    "mineral": "Heulandita-Na",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Heinrich T. Frank (UFRGS, 2018)",
+    "sourcePage": 113,
+    "author": "Heinrich T. Frank",
+    "license": "Uso não comercial",
+    "url": "",
+    "requiresInternet": "não",
+    "parentGroup": "Heulandita"
+  },
+  {
+    "mineral": "Monazita-(Nd)",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Wikimedia Commons",
+    "sourcePage": "",
+    "author": "Jan Czeczotka",
+    "license": "ver ficha do arquivo",
+    "url": "https://commons.wikimedia.org/wiki/File:Monazit.jpg",
+    "requiresInternet": "sim",
+    "parentGroup": "Monazita"
+  },
+  {
+    "mineral": "Pumpellyita-(Fe3+)",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Wikimedia Commons",
+    "sourcePage": "",
+    "author": "Leon Hupperichs",
+    "license": "ver ficha do arquivo",
+    "url": "https://commons.wikimedia.org/wiki/File:Pumpellyite-(Mg)-94433.jpg",
+    "requiresInternet": "sim",
+    "parentGroup": "Pumpellyita"
+  },
+  {
+    "mineral": "Siderofilita",
+    "status": "Foto ilustrativa do grupo",
+    "imageType": "Imagem ilustrativa do grupo; espécie não confirmada",
+    "source": "Heinrich T. Frank (UFRGS, 2018)",
+    "sourcePage": 35,
+    "author": "Heinrich T. Frank",
+    "license": "Uso não comercial",
+    "url": "",
+    "requiresInternet": "não",
+    "parentGroup": "Biotita"
+  }
+]
