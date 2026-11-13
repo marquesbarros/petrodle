@@ -1,0 +1,25 @@
+name: Testes do Petrodle
+
+on:
+  push:
+    branches: [main, simplificar-jogo-imagem-20261113]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar fotografias e catálogo
+        run: node tests/photos.test.cjs index.html
+      - name: Verificar datas e dicas
+        run: node tests/daily-and-clues.test.cjs index.html
+      - name: Verificar desafio único por imagem
+        run: node tests/single-image-mode.test.cjs index.html
