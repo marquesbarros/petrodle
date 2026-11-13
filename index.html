@@ -728,7 +728,9 @@ function redactMineralName(text,mineral) {
   }
   return prev[b.length];
  };
- let result=source.replace(/\p{L}[\p{L}\p{M}]*/gu,word=>{
+ let complete=source;
+ for(const name of names)complete=complete.replaceAll(name,'[mineral]');
+ let result=complete.replace(/\p{L}[\p{L}\p{M}]*/gu,word=>{
   const token=normalizeText(word);
   return normalized.some(name=>!name.includes(' ')&&(token===name||
    (name.length>=7&&token.length>=6&&editDistance(token,name)<=(name.length>=10?2:1))))
