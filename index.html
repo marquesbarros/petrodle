@@ -266,6 +266,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at 8% 32%,#d0e6db9c,tra
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){.guess-board td.cell,.guess-board td.cell.tile-revealed{transition:none;animation:none}.guess-board td.cell.tile-pending{transform:none;filter:none}}
 .mineral-fallback-icon{display:block;flex:0 0 auto;border-radius:7px}.attempt-icon .mineral-fallback-icon{width:32px;height:32px}
+.result-profile{padding:22px;min-width:0;overflow-wrap:anywhere}.result-profile .catalog-properties{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}.result-profile .photo-gallery{max-width:100%;overflow:hidden}.result-profile .catalog-source-list{margin-top:18px}
 </style>
 </head>
 <body>
@@ -891,7 +892,7 @@ function gallery(m){
 function profile(){
  if(!status().ended||revealingGuessId)return '';
  const m=byId.get(state.targetId);
- return `<section class="aside-card result-profile" aria-label="Ficha após a partida"><div class="profile-top"><div><p class="profile-kicker">Ficha mineralógica · Guia p. ${m.sourcePage}</p><h2 class="profile-name">${esc(m.name)}</h2><p class="profile-type">${esc(m.kind)} · PPL: ${esc(displayValue(m,'colorPPL'))}</p>${m.parentGroup?`<p class="photo-scope">Óptica geral do verbete ${esc(m.parentGroup)}; identificação individual exige dados adicionais.</p>`:''}</div><div class="chem-profile"><strong>${esc(m.formula||'Composição variável')}</strong><span>${esc(m.anionGroup)} ${m.silicateStructure?'· '+esc(m.silicateStructure):''} · Cátions: ${esc(m.cations.join(', ')||'Não informado')}</span></div></div><div class="profile-details"><div><div class="profile-block"><h3>Nicóis paralelos · PPL</h3><p>${esc(m.ppl)}</p></div><div class="profile-block"><h3>Nicóis cruzados · XPL</h3><p>${esc(m.xpl)}</p></div><div class="profile-block"><h3>Diagnóstico diferencial</h3><p>${esc(m.diagnostic)}</p></div></div>${gallery(m)}</div></section>`;
+ return `<section class="aside-card result-profile" aria-label="Ficha mineralógica completa após a partida">${catalogDetail(m)}</section>`;
 }
 function catalogDialog(){
  return `<dialog id="catalog-dialog" class="catalog-dialog" aria-labelledby="catalog-title"><div class="catalog-head"><div><div class="eyebrow">REFERÊNCIA MINERALÓGICA</div><h2 id="catalog-title">Catálogo de minerais</h2><p>${MINERALS.filter(m=>m.taxonRank==='species').length} espécies e ${MINERALS.filter(m=>m.taxonRank!=='species').length} referências taxonômicas, com fontes e fotografias identificadas.</p></div><button id="close-catalog" class="dialog-close" aria-label="Fechar catálogo">×</button></div><div class="catalog-body"><input id="catalog-search" class="catalog-search" type="search" placeholder="Nome, fórmula, classe, cor em PPL, cátion..."><div id="catalog-list" class="catalog-list"></div><div id="catalog-detail" class="catalog-detail"></div><p class="catalog-copyright">Imagens do Guia Frank para usos não comerciais; imagens externas têm autores, licenças e links próprios. Os campos comparativos são didáticos e permanecem sujeitos a revisão.</p></div></dialog>`;
