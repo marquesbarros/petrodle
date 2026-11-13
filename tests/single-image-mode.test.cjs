@@ -11,9 +11,9 @@ assert.ok(start !== -1 && end > start, 'Script do jogo não localizado');
 
 const ctx = {};
 vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MODES, MINERALS, getEligibleForMode, getModeDailyId, getSuggestionImage, getPlayableState};',
+  '\nglobalThis.__test = {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getSuggestionImage, getPlayableState};',
   ctx, {timeout: 30000});
-const {MODES, MINERALS, getEligibleForMode, getModeDailyId, getSuggestionImage, getPlayableState} = ctx.__test;
+const {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getSuggestionImage, getPlayableState} = ctx.__test;
 
 // Um único jogo: imagem sem efeito, palpites e dicas opcionais.
 assert.deepEqual(Array.from(MODES, m => m.id), ['classic'], 'Somente a modalidade visual deve continuar ativa');
@@ -27,14 +27,18 @@ assert.ok(eligible.every(m => m.images.some(im =>
 const valid = new Set(eligible.map(m => m.id));
 for (let day = 1; day <= 365; day++) {
   const date = new Date(Date.UTC(2026, 0, day)).toISOString().slice(0, 10);
-  assert.ok(valid.has(getModeDailyId(MINERALS, date, 'classic')), `Resposta do dia ${date} não tem foto identificada`);
+  const daily = getModeDailyId(MINERALS, date, 'classic');
+  assert.ok(valid.has(daily), `Resposta do dia ${date} não tem foto identificada`);
+  const previous = getDailyId(MINERALS, date);
+  if (valid.has(previous)) assert.equal(daily, previous,
+    `Não alterar o mineral de ${date} quando ele já possui fotografia identificada`);
 }
 assert.deepEqual(
   Array.from(Object.values(getPlayableState('classic', Array.from({length: 12}, (_, i) => 'test' + i), 'other'))),
   [false, false, false], 'Sem limite artificial de tentativas'
 );
 
-const challenge = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function otherBoard()'));
+const challenge = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function attemptBoard()'));
 assert.match(challenge, /<img /, 'Deve renderizar a imagem completa');
 assert.doesNotMatch(challenge, /pixel-canvas|grayscale\(|blur\(|silhouette-frame|<canvas/,
   'Não pode ocultar a imagem com filtros de silhueta ou pixels');
