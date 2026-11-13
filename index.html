@@ -707,10 +707,26 @@ function getModeDailyId(minerals,date,mode) {
  return order[(hash32(mode+':'+Math.floor(dayIndex/order.length)) + ((dayIndex%order.length)+order.length)%order.length)%order.length];
 }
 function redactMineralName(text,mineral) {
- let str=String(text??'').replace(/\s+/g,' ').trim();
- const names=[mineral.name,...mineral.aliases].filter(s=>s.length>=3).sort((a,b)=>b.length-a.length);
- for(const n of names)str=str.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'[mineral]');
- return str;
+ const source=String(text??'').replace(/\s+/g,' ').trim();
+ const names=[mineral.name,...(mineral.aliases||[])].filter(n=>typeof n==='string'&&n.length>=3);
+ const normalized=names.map(n=>normalizeText(n));
+ const editDistance=(a,b)=>{
+  if(Math.abs(a.length-b.length)>2)return 3;
+  let prev=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+   const next=[i];
+   for(let j=1;j<=b.length;j++)next[j]=Math.min(next[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+   prev=next;
+  }
+  return prev[b.length];
+ };
+ let result=source.replace(/\p{L}[\p{L}\p{M}]*/gu,word=>{
+  const token=normalizeText(word);
+  return normalized.some(name=>!name.includes(' ')&&(token===name||
+   (name.length>=7&&token.length>=6&&editDistance(token,name)<=(name.length>=10?2:1))))
+   ?'[mineral]':word;
+ });
+ return result;
 }
 function buildProgressiveClues(mineral){
  const raw=[
