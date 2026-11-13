@@ -267,6 +267,12 @@ body{min-height:100vh;background:radial-gradient(ellipse at 8% 32%,#d0e6db9c,tra
 @media(prefers-reduced-motion:reduce){.guess-board td.cell,.guess-board td.cell.tile-revealed{transition:none;animation:none}.guess-board td.cell.tile-pending{transform:none;filter:none}}
 .mineral-fallback-icon{display:block;flex:0 0 auto;border-radius:7px}.attempt-icon .mineral-fallback-icon{width:32px;height:32px}
 .result-profile{padding:22px;min-width:0;overflow-wrap:anywhere}.result-profile .catalog-properties{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}.result-profile .photo-gallery{max-width:100%;overflow:hidden}.result-profile .catalog-source-list{margin-top:18px}
+
+.petrodle-celebration{position:fixed;inset:0;pointer-events:none;z-index:250;overflow:hidden}
+.firework-burst{position:absolute;width:1px;height:1px}
+.firework-ray{position:absolute;left:0;top:0;width:3px;height:14px;border-radius:3px;background:var(--ray-color);opacity:0;transform-origin:50% 0;animation:firework-ray 1050ms ease-out var(--delay) both}
+@keyframes firework-ray{0%{opacity:0;transform:rotate(var(--angle)) translateY(0) scale(.2)}18%{opacity:.85}75%{opacity:.68}100%{opacity:0;transform:rotate(var(--angle)) translateY(-95px) scale(.35)}}
+@media(prefers-reduced-motion:reduce){.petrodle-celebration{display:none}}
 </style>
 </head>
 <body>
@@ -840,6 +846,7 @@ function refreshDailyDate() {
 let view='home';
 let suggestionItems=[],selection=-1;
 let revealingGuessId=null, revealTimers=[];
+let celebrationPending=false;
 function cancelReveal(){revealTimers.forEach(clearTimeout);revealTimers=[];revealingGuessId=null;}
 function status(){return getPlayableState(state.gameMode,state.guesses,state.targetId);}
 function persist(){save(stateKey(state.gameMode,state.playMode),{targetId:state.targetId,guesses:state.guesses,hintCount:state.hintCount});save('petrodle:gameMode',state.gameMode);save('petrodle:runMode',state.playMode);}
@@ -955,7 +962,38 @@ function hintSection(){
 }
 function resultBanner(){const r=status(),m=byId.get(state.targetId);return `<section class="result" aria-live="polite"><div class="result-head"><div class="result-icon">${icon(r.won?'trophy':'help',20)}</div><div><h3>${r.won?'Identificação correta':'Tentativas encerradas'}: ${esc(m.name)}</h3><p>${state.guesses.length} ${state.guesses.length===1?'palpite':'palpites'} · ${r.won?'Mineral adicionado à coleção.':'Veja abaixo os critérios diagnósticos.'}</p></div></div><div class="result-actions"><button id="share" class="solid-small">${icon('copy',14)} Compartilhar resultado</button>${state.playMode==='training'?'<button id="next-result" class="outline-small">Próximo mineral →</button>':''}</div></section>`;}
 function dialogs(){return `<dialog class="dialog" id="help-dialog"><div class="dialog-top"><h2>Como jogar</h2><button id="close-help" class="dialog-close" aria-label="Fechar">×</button></div><div class="dialog-body"><p>Escolha um dos quatro desafios. Cada modo apresenta um mineral diferente por dia. No treinamento você pode repetir quantas vezes quiser.</p><ol><li><b>Clássico:</b> compare onze propriedades químicas, cristalográficas e ópticas, incluindo incolor/colorido em PPL.</li><li><b>Silhueta:</b> reconheça o contraste de uma fotomicrografia em tons de cinza. A imagem é estilizada, não uma segmentação real.</li><li><b>Pixel:</b> a resolução da fotomicrografia aumenta a cada erro.</li><li><b>Descrição:</b> comece com uma descrição e solicite novas pistas após 3 e 6 tentativas.</li></ol><p class="dialog-note">No clássico, verde = igual, amarelo = parcial, cinza = diferente e traço = indisponível. ↑ e ↓ indicam a direção dos valores ordenados. A cada três palpites, você pode pedir uma dica opcional em qualquer modo. Grupos não são respostas. As propriedades do guia estão sujeitas a variações e revisão; a distinção entre colorido e incolor refere-se à PPL, nunca às cores de interferência em XPL.</p></div></dialog>${catalogDialog()}<div id="toast" class="toast" role="status" aria-live="polite"></div>`;}
-function render(){refreshDailyDate();root.innerHTML=header()+(view==='home'?home():gameShell())+footer()+dialogs();bind();if(view==='game'&&state.gameMode==='pixel')paintPixel();if(view==='game'&&state.gameMode==='classic'&&revealingGuessId)startReveal();}
+function render(){
+ refreshDailyDate();
+ root.innerHTML=header()+(view==='home'?home():gameShell())+footer()+dialogs();
+ bind();
+ if(view==='game'&&state.gameMode==='pixel')paintPixel();
+ if(view==='game'&&state.gameMode==='classic'&&revealingGuessId)startReveal();
+ if(view==='game'&&celebrationPending&&status().won&&!revealingGuessId){celebrationPending=false;celebrateWin();}
+}
+function celebrateWin(){
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+ document.querySelector('.petrodle-celebration')?.remove();
+ const overlay=document.createElement('div');
+ overlay.className='petrodle-celebration';
+ overlay.setAttribute('aria-hidden','true');
+ const places=[[28,35],[51,22],[72,41]];
+ places.forEach(([x,y],burst)=>{
+  const cluster=document.createElement('div');
+  cluster.className='firework-burst';
+  cluster.style.left=x+'%';cluster.style.top=y+'%';
+  for(let i=0;i<12;i++){
+   const ray=document.createElement('span');
+   ray.className='firework-ray';
+   ray.style.setProperty('--angle',i*30+'deg');
+   ray.style.setProperty('--delay',burst*240+'ms');
+   ray.style.setProperty('--ray-color',['#75a994','#d6b36c','#a0b5c7'][burst]);
+   cluster.append(ray);
+  }
+  overlay.append(cluster);
+ });
+ document.body.append(overlay);
+ setTimeout(()=>overlay.remove(),2100);
+}
 function startReveal(){
  revealTimers.forEach(clearTimeout);revealTimers=[];
  const guessId=revealingGuessId;
@@ -1009,7 +1047,7 @@ function guess(){if(status().ended||revealingGuessId)return;const text=normalize
  const matches=searchMinerals(MINERALS,text,2);const m=exact||(matches.length===1?matches[0]:null);
  if(!m){msg('Selecione um nome da lista para registrar sua tentativa.');showSuggestions();return;}
  if(state.guesses.includes(m.id)){msg('Você já tentou esse mineral.');return;}
- state.guesses.push(m.id);if(m.id===state.targetId)discover(m.id);state.message='';revealingGuessId=state.gameMode==='classic'?m.id:null;persist();render();}
+ state.guesses.push(m.id);if(m.id===state.targetId){discover(m.id);celebrationPending=true;}state.message='';revealingGuessId=state.gameMode==='classic'?m.id:null;persist();render();}
 function changeGame(mode){if(!MODES.some(m=>m.id===mode))return;cancelReveal();if(state.gameMode!==mode)state=load(mode,state.playMode);view='game';persist();render();window.scrollTo?.({top:0,behavior:'instant'});}
 function changeRun(mode){if(state.playMode===mode)return;cancelReveal();state=load(state.gameMode,mode);persist();render();}
 function nextTraining(){cancelReveal();state=load(state.gameMode,'training');state.targetId=chooseTraining(state.gameMode,state.targetId);state.guesses=[];state.hintCount=0;persist();render();}
