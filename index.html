@@ -265,6 +265,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at 8% 32%,#d0e6db9c,tra
 @keyframes petrodle-pop{0%{transform:translateY(10px) rotateX(-65deg) scale(.89);opacity:0}66%{transform:translateY(-3px) rotateX(5deg) scale(1.025);opacity:1}100%{transform:none;opacity:1}}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){.guess-board td.cell,.guess-board td.cell.tile-revealed{transition:none;animation:none}.guess-board td.cell.tile-pending{transform:none;filter:none}}
+.mineral-fallback-icon{display:block;flex:0 0 auto;border-radius:7px}.attempt-icon .mineral-fallback-icon{width:32px;height:32px}
 </style>
 </head>
 <body>
@@ -776,6 +777,11 @@ function getSuggestionImage(mineral) {
  const verified=pictures.filter(im=>im.verifiedForSpecies!==false);
  return verified.find(im=>/^data:image\//i.test(im.src)) || verified[0] || pictures[0] || null;
 }
+function mineralIcon(mineral) {
+ const hue=hash32(mineral.id)%360;
+ const initials=esc(mineral.name.slice(0,2).toUpperCase());
+ return `<svg class="mineral-fallback-icon" viewBox="0 0 48 48" width="45" height="49" role="img" aria-label="Ícone ilustrativo de ${esc(mineral.name)}"><rect width="48" height="48" rx="8" fill="hsl(${hue} 22% 92%)"/><path d="M24 7 36 16 33 34 24 41 13 34 12 16Z" fill="hsl(${hue} 29% 68%)" stroke="hsl(${hue} 34% 38%)" stroke-width="1.2"/><path d="M24 7v34M12 16l12 7 12-7M13 34l11-11 9 11" fill="none" stroke="hsl(${hue} 31% 44%)" stroke-width="1.1" opacity=".7"/><text x="24" y="28" text-anchor="middle" font-size="9" font-weight="700" fill="hsl(${hue} 38% 22%)">${initials}</text></svg>`;
+}
 function getOfflineFallback(mineral) {
  return (mineral?.images||[]).find(im=>im.src?.startsWith('data:image/') && im.verifiedForSpecies===false) || null;
 }
@@ -857,7 +863,7 @@ function cell(m,target,key,revealIndex=null){
 function classicBoard(){
  if(!state.guesses.length)return `<div class="board-empty"><div class="empty-glyph">${logo}</div><h3>Comece com um mineral</h3><p>Digite um nome acima. Cada tentativa revela as propriedades que combinam com o mineral secreto.</p></div>`;
  const target=byId.get(state.targetId);
- const rows=[...state.guesses].reverse().map((id,i)=>{const m=byId.get(id);const im=getMicrophoto(m);return `<tr><td class="name-col"><span class="guess-mineral-wrap">${im?`<img class="guess-mineral-thumb" src="${im.src}" alt="">`:logo}<span><span class="mineral-name">${esc(m.name)}</span><span class="mineral-index">#${state.guesses.length-i}</span></span></span></td>${BOARD_KEYS.map((k,j)=>cell(m,target,k,id===revealingGuessId?j:null)).join('')}</tr>`;}).join('');
+ const rows=[...state.guesses].reverse().map((id,i)=>{const m=byId.get(id);const im=getSuggestionImage(m);return `<tr><td class="name-col"><span class="guess-mineral-wrap">${im?`<img class="guess-mineral-thumb" src="${esc(im.src)}" alt="" data-thumb-fallback="1"><span class="thumb-fallback" hidden>${mineralIcon(m)}</span>`:mineralIcon(m)}<span><span class="mineral-name">${esc(m.name)}</span><span class="mineral-index">#${state.guesses.length-i}</span></span></span></td>${BOARD_KEYS.map((k,j)=>cell(m,target,k,id===revealingGuessId?j:null)).join('')}</tr>`;}).join('');
  return `<div class="board-scroll" role="region" tabindex="0" aria-label="Tabela química e óptica dos palpites"><table class="guess-board"><thead><tr><th>Mineral</th>${BOARD_COLUMNS.map(col=>`<th class="head-${col.group}">${esc(col.label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function getMicrophoto(m){return m.images.find(im=>im.verifiedForSpecies!==false&&im.src.startsWith('data:image/'));}
@@ -876,7 +882,7 @@ function challengeClues(){
 }
 function otherBoard(){
  const m=byId.get(state.targetId);
- return `<section class="challenge-stage" aria-label="Pista do mineral secreto">${['pixel','silhouette'].includes(state.gameMode)?challengeImage():challengeClues()}</section><div class="board-intro"><strong>Seus palpites</strong><span class="board-description">${Math.max(0,8-state.guesses.length)} tentativas restantes</span><span>${state.guesses.length} / 8</span></div><div class="attempt-list">${state.guesses.length?state.guesses.map((id,i)=>`<div class="attempt-item ${id===m.id?'hit':''}"><span class="attempt-number">${i+1}</span><b>${esc(byId.get(id).name)}</b><span>${id===m.id?'Identificado ✓':'Não corresponde ×'}</span></div>`).join(''):'<p class="attempt-empty">Nenhuma tentativa ainda. Observe a pista e escolha um mineral.</p>'}</div>`;
+ return `<section class="challenge-stage" aria-label="Pista do mineral secreto">${['pixel','silhouette'].includes(state.gameMode)?challengeImage():challengeClues()}</section><div class="board-intro"><strong>Seus palpites</strong><span class="board-description">${Math.max(0,8-state.guesses.length)} tentativas restantes</span><span>${state.guesses.length} / 8</span></div><div class="attempt-list">${state.guesses.length?state.guesses.map((id,i)=>`<div class="attempt-item ${id===m.id?'hit':''}"><span class="attempt-number">${i+1}</span><span class="attempt-icon">${mineralIcon(byId.get(id))}</span><b>${esc(byId.get(id).name)}</b><span>${id===m.id?'Identificado ✓':'Não corresponde ×'}</span></div>`).join(''):'<p class="attempt-empty">Nenhuma tentativa ainda. Observe a pista e escolha um mineral.</p>'}</div>`;
 }
 function gallery(m){
  if(!m.images.length)return `<p class="photo-missing">Sem imagem atribuível a uma espécie específica neste verbete.</p>`;
@@ -1039,7 +1045,7 @@ function bind(){
  document.getElementById('share')?.addEventListener('click',share);
  bindExternalImages();
 }
-function bindExternalImages(){document.querySelectorAll('img[data-external]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;const next=img.nextElementSibling;if(next?.classList.contains('photo-fallback'))next.hidden=false;},{once:true}));}
+function bindExternalImages(){document.querySelectorAll('img[data-thumb-fallback]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;const fallback=img.nextElementSibling;if(fallback)fallback.hidden=false;},{once:true}));document.querySelectorAll('img[data-external]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;const next=img.nextElementSibling;if(next?.classList.contains('photo-fallback'))next.hidden=false;},{once:true}));}
 render();
 // Atualiza o desafio à meia-noite local, inclusive em abas mantidas abertas.
 setInterval(() => { if (getLocalDateKey() !== today) render(); }, 30000);
