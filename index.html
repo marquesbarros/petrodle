@@ -707,7 +707,10 @@ function getEligibleForMode(minerals,_mode) {
   im.verifiedForSpecies!==false&&typeof im.src==='string'&&/^(data:image\/|https:\/\/)/i.test(im.src)));
 }
 function getModeDailyId(minerals,date,_mode) {
- return getDailyId(getEligibleForMode(minerals,'classic'),date);
+ const eligible=getEligibleForMode(minerals,'classic');
+ const original=getDailyId(minerals,date);
+ // Manter o desafio existente quando a resposta tem fotografia identificada.
+ return eligible.some(m=>m.id===original)?original:getDailyId(eligible,date);
 }
 function hash32(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 
