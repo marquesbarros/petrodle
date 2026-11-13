@@ -32,4 +32,12 @@ assert.equal(redactMineralName('A+B (Ce) e X.Y; não AAB (Ce) nem XqY', syntheti
 for (const m of MINERALS.filter(x => x.playable)) {
   assert.equal(buildProgressiveClues(m).length, 6, `${m.name}: seis níveis de pistas`);
 }
-console.log('OK: dia local em dois fusos, virada à meia-noite e nomes mascarados em pistas');
+const corindon = MINERALS.find(m => m.id === 'corindon');
+const espodumenio = MINERALS.find(m => m.id === 'espodumenio');
+assert.ok(buildProgressiveClues(corindon)[0].value.startsWith('[mineral]'), 'Corindon sem acento não deve revelar a resposta');
+assert.ok(buildProgressiveClues(espodumenio)[0].value.includes('[mineral]'), 'Erro de transcrição de espodumênio deve ser ocultado');
+assert.ok(html.includes('data-thumb-fallback'), 'Palpites sem imagem precisam de ícone substituto');
+assert.ok(html.includes('celebrationPending=true'), 'Acerto deve ativar a comemoração');
+assert.ok(html.includes('prefers-reduced-motion'), 'Comemoração deve respeitar movimento reduzido');
+assert.ok(html.includes('${catalogDetail(m)}</section>'), 'Ficha final deve reutilizar a ficha completa do catálogo');
+console.log('OK: pistas sem vazamentos, ícones substitutos, comemoração e ficha completa');
