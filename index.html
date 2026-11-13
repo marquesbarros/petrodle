@@ -769,15 +769,6 @@ function getDailyModeSummary(minerals, modes, date, readProgress) {
   return {...mode, attempts:guesses.length, status:won?'won':mode.id!=='classic'&&guesses.length>=8?'lost':guesses.length?'playing':'available'};
  });
 }
-function getMenuCoverImage(minerals,date,mode) {
- const secret=getModeDailyId(minerals,date,mode);
- const others=getEligibleForMode(minerals,'classic').filter(m=>m.id!==secret);
- const mineral=others[8%others.length];
- const picture=mineral&&getSuggestionImage(mineral);
- return picture?{mineralId:mineral.id,src:picture.src}:null;
-}
-
-
 /** Interaction-only helpers; never substitute a group photograph for a species identification. */
 function getSuggestionImage(mineral) {
  const pictures=Array.isArray(mineral?.images)?mineral.images.filter(im=>typeof im.src==='string'&&(/^(data:image\/|https:\/\/)/i.test(im.src))):[];
@@ -925,9 +916,8 @@ function header(){
 function home(){
  const count=discoveries().length;
  const progress=getDailyModeSummary(MINERALS,MODES,today,mode=>stored(stateKey(mode,'daily'),{}))[0];
- const cover=getMenuCoverImage(MINERALS,today,'classic');
  const label=progress.status==='won'?'Rever resultado':progress.status==='playing'?'Continuar desafio':'Jogar agora';
- return `<div class="hub"><section class="hub-hero"><div class="hub-hero-copy"><span class="hub-kicker"><span class="kicker-dot"></span> DESAFIO DIÁRIO DE MINERALOGIA</span><h1>Qual é o <span>mineral?</span></h1><p>Observe uma fotografia mineralógica e tente identificar a espécie.</p><div class="hero-quick"><span>${icon('calendar',15)} Desafio #${getPuzzleNumber(today)}</span><span>${icon('book',15)} ${playable.length} minerais no catálogo</span></div><div class="hub-start"><button type="button" class="hub-start-button" data-game-mode="classic">${label} ${icon('right',18)}</button><span>${progress.status==='won'?'Desafio concluído':progress.attempts?`${progress.attempts} palpites registrados`:'Uma imagem, quantas tentativas precisar'}</span></div></div><div class="hero-decor" aria-hidden="true">${cover?`<img src="${esc(cover.src)}" alt="">`:''}<div class="hero-prism">${logo}</div><span class="hero-decor-star star-one">✦</span><span class="hero-decor-star star-two">✧</span></div></section><div class="hub-bottom"><div><span class="hub-bottom-ico">${icon('trophy',19)}</span><span><b>Sua coleção mineralógica</b><small>${count} de ${playable.length} minerais identificados</small></span></div><div class="hub-progress-track"><span style="width:${Math.round(100*count/playable.length)}%"></span></div></div></div>`;
+ return `<div class="hub"><section class="hub-hero"><div class="hub-hero-copy"><span class="hub-kicker"><span class="kicker-dot"></span> DESAFIO DIÁRIO DE MINERALOGIA</span><h1>Qual é o <span>mineral?</span></h1><p>Observe uma fotografia mineralógica e tente identificar a espécie.</p><div class="hero-quick"><span>${icon('calendar',15)} Desafio #${getPuzzleNumber(today)}</span><span>${icon('book',15)} ${playable.length} minerais no catálogo</span></div><div class="hub-start"><button type="button" class="hub-start-button" data-game-mode="classic">${label} ${icon('right',18)}</button><span>${progress.status==='won'?'Desafio concluído':progress.attempts?`${progress.attempts} palpites registrados`:'Uma imagem, quantas tentativas precisar'}</span></div></div><div class="hero-decor" aria-hidden="true"><div class="hero-prism">${logo}</div><span class="hero-decor-star star-one">✦</span><span class="hero-decor-star star-two">✧</span></div></section><div class="hub-bottom"><div><span class="hub-bottom-ico">${icon('trophy',19)}</span><span><b>Sua coleção mineralógica</b><small>${count} de ${playable.length} minerais identificados</small></span></div><div class="hub-progress-track"><span style="width:${Math.round(100*count/playable.length)}%"></span></div></div></div>`;
 }
 function legend(){
  const count=discoveries().length;
