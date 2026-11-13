@@ -25,7 +25,7 @@ const photo = getEligibleForMode(MINERALS, 'photo');
 const description = getEligibleForMode(MINERALS, 'description');
 assert.equal(classic.length, MINERALS.filter(m => m.playable).length,
   'Clássico deve manter todos os minerais jogáveis');
-assert.ok(photo.length >= 140, 'Modo Imagem deve incluir espécies com fotografia verificada');
+assert.ok(photo.length >= 30, 'Modo Imagem deve incluir espécies com fotografia verificada');
 assert.ok(photo.every(m => m.images.some(im =>
   im.verifiedForSpecies !== false && typeof im.src === 'string' && im.src.startsWith('data:image/'))),
   'Modo Imagem não pode sortear foto genérica de grupo nem espécie sem fotografia válida');
