@@ -49,6 +49,8 @@ assert.doesNotMatch(board, /classicBoard\(\)|otherBoard\(\)/,
 const shell = html.slice(html.indexOf('function gameShell()'), html.indexOf('function footer()'));
 assert.doesNotMatch(shell, /mini-mode-nav|Voltar aos modos/, 'Não deve haver seleção de modalidades');
 const home = html.slice(html.indexOf('function home()'), html.indexOf('function legend()'));
+assert.doesNotMatch(home, /getMenuCoverImage|const cover=/,
+  'A fotografia decorativa da página inicial não deve parecer a resposta do desafio');
 assert.doesNotMatch(home, /QUATRO MODOS|Escolha seu desafio|hub-mode-grid/,
   'Página inicial deve apresentar um só desafio');
 assert.doesNotMatch(html, /function paintPixel\(\)/, 'Remover renderizador de pixels não utilizado');
