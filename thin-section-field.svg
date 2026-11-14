@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Campo de lâmina delgada e platina de microscópio</title>
+<desc id="desc">Desenho vetorial discreto de contornos de grãos minerais, círculos de microscopia e marcas de orientação sobre um fundo neutro.</desc>
+<defs>
+  <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5f1e8"/><stop offset=".54" stop-color="#ece9df"/><stop offset="1" stop-color="#e5e6de"/></linearGradient>
+  <radialGradient id="lens"><stop stop-color="#f8f3e8"/><stop offset=".75" stop-color="#e0e7de"/><stop offset="1" stop-color="#cad8ca"/></radialGradient>
+  <pattern id="dot" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".75" fill="#426b61" opacity=".22"/></pattern>
+  <clipPath id="left-view"><circle cx="25" cy="245" r="350"/></clipPath>
+  <clipPath id="right-view"><circle cx="1520" cy="825" r="365"/></clipPath>
+  <g id="grains" stroke="#617d72" stroke-width="2.5" stroke-linejoin="round" fill="none">
+    <path d="M-15 0 105 -38 190 55 134 167 2 147ZM190 55l139-50 115 104-64 113-108 8-138-63M2 147l132 20 138 63-35 128-173 27-87-85M272 230l108-8 126 98-83 121-186-83M64 385l173-27 186 83-24 160-177 46L17 532M423 441l145-76 135 97-26 176-165 44-113-81M222 647l177-46 113 81-57 150-205 30-95-124M512 682l165-44 113 130-53 161-173 16-109-113M703 462l123-80 128 122-35 142-129 122-113-130M826 382l182-62 89 128-32 153-146 45M1008 320l159 23 93 146-90 133-105-21M1097 448l163 41 148-48 98 136-89 118-247-73M790 768l129-122 146-45 105 21 22 181-160 95-142-14M1192 803l-22-181 247 73 115 136-88 130-252 12M250 862l205-30 109 113-22 110-209 14M737 929l53-161 100 116-34 139"/>
+    <path d="m134 167-12-93m302 368 64-27m189 223 52-63m-490-217-40 60m866 183 72-58m-75 279-84-40" stroke-width="1"/>
+  </g>
+</defs>
+<rect width="1600" height="1000" fill="url(#paper)"/>
+<rect width="1600" height="1000" fill="url(#dot)" opacity=".43"/>
+<!-- Large translucent microscope stage at the edges, leaving the reading area clear. -->
+<g id="microscope-stage" stroke="#6c8b80" fill="none">
+  <circle cx="25" cy="245" r="394" stroke-width="26" opacity=".12"/>
+  <circle cx="25" cy="245" r="367" stroke-width="2" opacity=".38"/>
+  <circle cx="25" cy="245" r="357" stroke-width="1.5" stroke-dasharray="2 14" opacity=".55"/>
+  <circle cx="25" cy="245" r="340" stroke-width="3" opacity=".17"/>
+  <circle cx="1520" cy="825" r="403" stroke-width="25" opacity=".12"/>
+  <circle cx="1520" cy="825" r="380" stroke-width="2" opacity=".38"/>
+  <circle cx="1520" cy="825" r="367" stroke-width="1.5" stroke-dasharray="2 14" opacity=".58"/>
+  <circle cx="1520" cy="825" r="351" stroke-width="3" opacity=".17"/>
+  <path d="M25-155v66M25 577v60M-374 245h66M1520 425v54M1520 1172v-54M1122 825h56" opacity=".35" stroke-width="2"/>
+</g>
+<g clip-path="url(#left-view)">
+  <circle cx="25" cy="245" r="350" fill="url(#lens)" opacity=".54"/>
+  <g opacity=".17"><use href="#grains" transform="translate(-335,-100) scale(.75)"/></g>
+  <path d="M-110 50 30 4 123 95 46 202-111 218ZM46 202l77-107 143 75-20 129-130 47-70-144ZM-160 323 46 202l70 144-67 120-208-29Z" fill="#d5b99a" fill-opacity=".13"/>
+</g>
+<g clip-path="url(#right-view)">
+  <circle cx="1520" cy="825" r="365" fill="url(#lens)" opacity=".57"/>
+  <g opacity=".18"><use href="#grains" transform="translate(1130,465) scale(.8)"/></g>
+  <path d="M1431 553 1580 485 1706 565 1650 733 1500 758ZM1290 742l141-189 69 205-66 166-172-16ZM1500 758l150-25 97 170-115 105-198-84Z" fill="#b3c8bc" fill-opacity=".18"/>
+</g>
+<!-- Fine-grained petrographic linework across the canvas. -->
+<g id="grain-boundaries" opacity=".13"><use href="#grains" transform="translate(155 14) scale(.85)"/></g>
+<g stroke="#517368" fill="none" stroke-width="1.6" opacity=".24">
+  <path d="M715 130h76m-38-38v76M805 130h11M753 82v-13"/>
+  <circle cx="753" cy="130" r="28" stroke-dasharray="3 6"/>
+  <path d="M882 904h67m-33-33v66"/>
+  <circle cx="916" cy="904" r="22" stroke-dasharray="3 5"/>
+</g>
+<g fill="#3b655a" font-family="Arial,sans-serif" font-size="12" letter-spacing="3" opacity=".29">
+ <text x="72" y="695">PPL</text><text x="1425" y="385">XPL</text>
+ <text x="750" y="182" text-anchor="middle">0°</text>
+</g>
+</svg>
