@@ -39,4 +39,20 @@ for (const char of css) {
   }
 }
 assert.equal(open, 0, 'Blocos de estilos devem estar fechados');
+// A ambientação é original, local e não interfere nas fotomicrografias científicas.
+const microscopeBackdrop = readFileSync(path.join(root, 'thin-section-field.svg'), 'utf8');
+assert.match(microscopeBackdrop, /<svg[\\s>]/, 'O cenário petrográfico deve ser um SVG local');
+assert.match(microscopeBackdrop, /microscope-stage/, 'O desenho deve remeter à platina do microscópio');
+assert.match(microscopeBackdrop, /grain-boundaries/, 'O desenho deve conter contornos de grãos');
+assert.match(css, /background:\\s*#eeeae1\\s+url\\("thin-section-field\\.svg"\\)/,
+  'A página deve usar o fundo de fotomicrografias ilustradas, não o cenário azul');
+
+// A ficha após o acerto não pode herdar a coluna estreita do catálogo.
+assert.match(css, /\\.result-profile \\.photo-gallery\\s*\\{[^}]*grid-template-columns:\\s*repeat\\(2,\\s*minmax\\(0,\\s*1fr\\)\\)/s,
+  'Em telas largas, as duas fotomicrografias devem ocupar colunas amplas');
+assert.match(css, /\\.result-profile \\.photo-gallery img\\s*\\{[^}]*object-fit:\\s*contain/s,
+  'As fotomicrografias devem aparecer inteiras, sem corte');
+assert.match(css, /@media\\(max-width:700px\\)[^]*?\\.result-profile \\.photo-gallery\\s*\\{[^}]*grid-template-columns:\\s*minmax\\(0,\\s*1fr\\)/,
+  'No celular, as fotos devem se empilhar');
+
 console.log('OK: menu de jogo, tela de partida, estados, responsividade e JS preservados');
