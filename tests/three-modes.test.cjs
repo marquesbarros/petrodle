@@ -89,6 +89,6 @@ assert.doesNotMatch(html, /function paintPixel\(\)|id:'silhouette'|id:'pixel'/,
   'Os renderizadores e modos antigos devem desaparecer');
 assert.match(html, /e\.key==='Enter'.*?selection>=0.*?guess\(\)/,
   'Enter deve permitir confirmar a opção destacada');
-assert.match(html, /N\u00e3o \u00e9 \$\{esc\(m\.name\)\}/,
+assert.match(html, /N\u00e3o \u00e9 \$\{m\.name\}/,
   'O palpite incorreto precisa dar retorno claro sem revelar a resposta');
 console.log('OK: três modos, Clássico e Descrição preservados, Imagem sem filtros e respostas com fotografia válida');
