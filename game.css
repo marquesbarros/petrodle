@@ -645,3 +645,96 @@ body{
 @media(prefers-reduced-motion:reduce){
   .hub-card,.hub-card-art img,.submit,.nav-link,.help-button{transition:none;animation:none}
 }
+
+
+/* =========================================================
+   PETRODLE — CAMPO PETROGRÁFICO
+   Fundo vetorial original, inspirado na platina e nos contornos
+   de grãos em lâmina delgada. Fotografias reais permanecem intactas.
+   ========================================================= */
+:root{--bg:#eeeae1}
+body{
+  background:#eeeae1 url("thin-section-field.svg") center top / cover fixed no-repeat;
+}
+.brand{
+  color:#23495c;
+  -webkit-text-stroke:0;
+  text-shadow:0 3px 0 #fffaf0,0 7px 20px #3f67622e;
+}
+.brand em{color:#a66a2c}
+.hub-hero h1{
+  color:#204b59;
+  -webkit-text-stroke:0;
+  text-shadow:0 3px 0 #fffaf0,0 7px 22px #5c7b7138;
+}
+.hub-hero h1 span{color:#aa7334}
+.game-heading h1{
+  color:#244e60;
+  -webkit-text-stroke:0;
+  text-shadow:0 3px 0 #fffaf0,0 7px 20px #557c752e;
+}
+.game-heading p{color:#315e68;text-shadow:0 1px 0 #fffcf2}
+.sources p,.source-links span{color:#325d62}
+
+/* A ficha pós-partida usa toda a largura do jogo, não a coluna do catálogo. */
+.result-profile{
+  display:block;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  padding:clamp(14px,2.5vw,28px);
+}
+.result-profile .catalog-detail{
+  display:block;
+  width:100%;
+  max-width:none;
+  min-width:0;
+}
+.result-profile :is(.profile-details,.catalog-detail-grid,.catalog-detail-layout,.catalog-layout):has(.photo-gallery){
+  display:block;
+  width:100%;
+  max-width:none;
+}
+.result-profile :has(> .photo-gallery){
+  grid-column:1 / -1;
+  min-width:0;
+  max-width:none;
+  width:100%;
+}
+.result-profile .photo-gallery{
+  display:grid;
+  grid-column:1 / -1;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+  align-items:start;
+  width:100%;
+  max-width:none;
+  margin:20px 0 0;
+  overflow:visible;
+}
+.result-profile .photo-gallery > *{
+  width:100%;
+  min-width:0;
+  max-width:none;
+}
+.result-profile .photo-gallery img{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+  max-height:650px;
+  object-fit:contain;
+  background:#f3f0e7;
+}
+@media(max-width:700px){
+  body{background-attachment:scroll;background-position:center top}
+  .brand{font-size:27px;text-shadow:0 2px 0 #fffaf0}
+  .hub-hero h1,.game-heading h1{text-shadow:0 2px 0 #fffaf0}
+  .result-profile{padding:12px}
+  .result-profile .photo-gallery{
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+    margin-top:16px;
+  }
+  .result-profile .photo-gallery img{max-height:none}
+}
