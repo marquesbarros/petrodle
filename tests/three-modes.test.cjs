@@ -11,9 +11,29 @@ assert.ok(start !== -1 && end > start, 'Script do jogo não localizado');
 
 const ctx = {};
 vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState};',
+  '\nglobalThis.__test = {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess};',
   ctx, {timeout: 30000});
-const {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState} = ctx.__test;
+const {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess} = ctx.__test;
+
+// A busca só registra nomes válidos e palpites inéditos, sem surpresas ao confirmar.
+const sample = [
+  {id:'albita', name:'Albita', aliases:['Ab'], playable:true},
+  {id:'almandina', name:'Almandina', aliases:[], playable:true},
+  {id:'feldspato', name:'Feldspato (grupo)', aliases:['Feldspato'], playable:false}
+];
+assert.equal(resolveGuess(sample, '  ', []).status, 'empty',
+  'Enter com o campo vazio não pode consumir uma tentativa');
+assert.equal(resolveGuess(sample, 'al', []).status, 'choose',
+  'Busca ambígua deve exigir seleção');
+assert.equal(resolveGuess(sample, 'Ab', []).id, 'albita',
+  'Sinônimos válidos devem ser aceitos');
+assert.equal(resolveGuess(sample, 'albita', ['albita']).status, 'duplicate',
+  'Palpite repetido não consome tentativa');
+assert.equal(resolveGuess(sample, 'feldspato', []).status, 'choose',
+  'Grupos mineralógicos não podem virar resposta');
+assert.equal(resolveGuess(sample, 'alman', []).id, 'almandina',
+  'Correspondência única pode ser confirmada pelo teclado');
+
 
 assert.deepEqual(Array.from(MODES, m => m.id), ['classic', 'photo', 'description'],
   'Clássico e Descrição devem ser preservados; Silhueta e Pixel dão lugar a Imagem');
@@ -67,4 +87,8 @@ assert.match(html, /state\.gameMode==='photo'\?challengeImage\(\):challengeClues
 assert.match(html, /petrodle:v6:/, 'Armazenamento anterior deve ser preservado');
 assert.doesNotMatch(html, /function paintPixel\(\)|id:'silhouette'|id:'pixel'/,
   'Os renderizadores e modos antigos devem desaparecer');
+assert.match(html, /e\.key==='Enter'.*?selection>=0.*?guess\(\)/,
+  'Enter deve permitir confirmar a opção destacada');
+assert.match(html, /N\u00e3o \u00e9 \$\{esc\(m\.name\)\}/,
+  'O palpite incorreto precisa dar retorno claro sem revelar a resposta');
 console.log('OK: três modos, Clássico e Descrição preservados, Imagem sem filtros e respostas com fotografia válida');
