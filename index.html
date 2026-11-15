@@ -703,9 +703,21 @@ const BOARD_KEYS = Object.freeze(BOARD_COLUMNS.map(({key})=>key));
 
 const MODES = Object.freeze([
  {id:'classic', name:'Clássico',subtitle:'Compare 11 propriedades · sem limite de palpites',icon:'sliders'},
- {id:'photo',name:'Imagem',subtitle:'Compare PPL e XPL · 8 tentativas',icon:'eye'},
+ {id:'photo',name:'Imagem',subtitle:'Compare duas fotomicrografias · 8 tentativas',icon:'eye'},
  {id:'description',name:'Descrição',subtitle:'Identifique pelas pistas · 8 tentativas',icon:'file'},
 ]);
+const DIFFICULTIES=Object.freeze([{id:'easy',name:'Fácil'},{id:'medium',name:'Médio'},{id:'hard',name:'Difícil'}]);
+const EASY_MINERAL_IDS=new Set(["quartzo","calcita","muscovita","fluorita","hematita","cianita","epidoto","ortoclasio","microclinio","zircao","titanita","augita","diopsidio","corindon","barita"]);
+const MEDIUM_MINERAL_IDS=new Set([...EASY_MINERAL_IDS,...["actinolita","aegirina","analcima","andalusita","anidrita","anortoclasio","antofilita","aragonita","berilo","brucita","cassiterita","clinozoisita","cloritoide","cordierita","enstatita","espinelio","estaurolita","flogopita","glaucofano","goethita","hedenbergita","lawsonita","leucita","magnesita","nefelina","prehnita","rutilo","sanidina","sillimanita","topazio"]]);
+function getDifficultyMinerals(minerals,difficulty='hard'){
+ const species=minerals.filter(m=>m.playable);
+ if(difficulty==='easy')return species.filter(m=>EASY_MINERAL_IDS.has(m.id));
+ if(difficulty==='medium')return species.filter(m=>MEDIUM_MINERAL_IDS.has(m.id));
+ return species;
+}
+function getDifficultyGuesses(minerals,mode,difficulty='hard'){
+ return difficulty==='hard'?minerals.filter(isGuessable):getEligibleForMode(minerals,mode,difficulty);
+}
 // Pares revisados nas legendas do Guia Frank (2018). A ordem representa [PPL/ND, XPL/NC].
 // Duas fotografias sem confirmação dos modos de iluminação não formam um par válido.
 const PHOTO_PAIR_INDEXES = Object.freeze({
@@ -788,21 +800,29 @@ function getPhotoPair(mineral) {
  if(!valid(ppl)||!valid(xpl)||ppl.src===xpl.src)return null;
  return {ppl,xpl};
 }
-function getEligibleForMode(minerals,mode) {
- const eligible=minerals.filter(m=>m.playable);
- if(mode==='photo') return eligible.filter(m=>Boolean(getPhotoPair(m)));
- if(mode==='description') return eligible.filter(m=>m.ppl && m.xpl && !m.ppl.startsWith('Sem descrição'));
+function getPhotoImages(mineral){
+ const pair=getPhotoPair(mineral);
+ if(pair)return [pair.ppl,pair.xpl];
+ const valid=(mineral?.images||[]).filter(im=>im.verifiedForSpecies!==false&&typeof im.src==='string'&&im.src.startsWith('data:image/'));
+ const distinct=[...new Map(valid.map(im=>[im.src,im])).values()];
+ return distinct.length>=2?distinct.slice(0,2):null;
+}
+function getEligibleForMode(minerals,mode,difficulty='hard'){
+ const eligible=getDifficultyMinerals(minerals,difficulty);
+ if(mode==='photo')return eligible.filter(m=>Boolean(getPhotoImages(m)));
+ if(mode==='description')return eligible.filter(m=>m.ppl&&m.xpl&&!m.ppl.startsWith('Sem descrição'));
  return eligible;
 }
 function hash32(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
-function getModeDailyId(minerals,date,mode) {
- const eligible=getEligibleForMode(minerals,mode);
- if(!eligible.length)throw new Error('Não há minerais elegíveis para o modo');
- if(mode==='classic')return getDailyId(minerals,date);
+function getModeDailyId(minerals,date,mode,difficulty='hard'){
+ const eligible=getEligibleForMode(minerals,mode,difficulty);
+ if(!eligible.length)throw new Error('Não há minerais elegíveis para este desafio');
+ if(mode==='classic'&&difficulty==='hard')return getDailyId(minerals,date);
  const dayIndex=Math.floor(Date.parse(`${date}T00:00:00Z`)/86400000);
  if(!Number.isFinite(dayIndex))throw new Error('Data inválida');
  const order=eligible.map(m=>m.id).sort();
- return order[(hash32(mode+':'+Math.floor(dayIndex/order.length)) + ((dayIndex%order.length)+order.length)%order.length)%order.length];
+ const key=difficulty==='hard'?mode:mode+':'+difficulty;
+ return order[(hash32(key+':'+Math.floor(dayIndex/order.length))+((dayIndex%order.length)+order.length)%order.length)%order.length];
 }
 function redactMineralName(text,mineral) {
  const source=String(text??'').replace(/\s+/g,' ').trim();
@@ -850,11 +870,11 @@ function getPlayableState(mode,guesses,targetId){
 }
 
 
-function getDailyModeSummary(minerals, modes, date, readProgress) {
+function getDailyModeSummary(minerals, modes, date, readProgress, difficulty='hard') {
  return modes.map(mode => {
   const progress = readProgress(mode.id) || {};
   const guesses = Array.isArray(progress.guesses) ? [...new Set(progress.guesses)] : [];
-  const targetId = getModeDailyId(minerals,date,mode.id);
+  const targetId = getModeDailyId(minerals,date,mode.id,difficulty);
   // Desconsiderar o progresso de um desafio cuja resposta mudou após atualização do catálogo.
   if(progress.targetId && progress.targetId!==targetId)guesses.length=0;
   const won=guesses.includes(targetId);
@@ -919,23 +939,32 @@ const icon=(name,size=17)=>{
 const logo='<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m8 3 8 0 5 7-9 11-9-11 5-7Z"/><path d="m8 3-2 7 6 11 6-11-2-7M3 10h18"/></svg>';
 function stored(k,fallback){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fallback;}catch{return fallback;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
-const stateKey=(gameMode,playMode)=>`petrodle:v6:${playMode}:${gameMode}${playMode==='daily'?':'+today:''}`;
-function chooseTraining(gameMode,previous){const options=getEligibleForMode(MINERALS,gameMode).filter(m=>m.id!==previous);return options[Math.floor(Math.random()*options.length)].id;}
-function load(gameMode,playMode){
- const prior=stored(stateKey(gameMode,playMode),{});
- const targetId=playMode==='daily'?getModeDailyId(MINERALS,today,gameMode):(getEligibleForMode(MINERALS,gameMode).some(m=>m.id===prior.targetId)?prior.targetId:chooseTraining(gameMode));
+const stateKey=(gameMode,playMode,difficulty='hard')=>{
+ const legacy=`petrodle:v6:${playMode}:${gameMode}${playMode==='daily'?':'+today:''}`;
+ return difficulty==='hard'?legacy:legacy+':'+difficulty;
+};
+function chooseTraining(gameMode,previous,difficulty='hard'){
+ const options=getEligibleForMode(MINERALS,gameMode,difficulty).filter(m=>m.id!==previous);
+ return options[Math.floor(Math.random()*options.length)].id;
+}
+function load(gameMode,playMode,difficulty='hard'){
+ const prior=stored(stateKey(gameMode,playMode,difficulty),{});
+ const eligible=getEligibleForMode(MINERALS,gameMode,difficulty);
+ const targetId=playMode==='daily'?getModeDailyId(MINERALS,today,gameMode,difficulty):(eligible.some(m=>m.id===prior.targetId)?prior.targetId:chooseTraining(gameMode,null,difficulty));
  const staleProgress=Boolean(prior.targetId&&prior.targetId!==targetId);
- const guesses=staleProgress?[]:[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>isGuessable(byId.get(id))))];
- return {gameMode,playMode,targetId,guesses,hintCount:staleProgress?0:Math.min(6,Math.max(0,Number(prior.hintCount)||0),getAvailableHintCount(guesses.length)),message:''};
+ const allowedIds=new Set(getDifficultyGuesses(MINERALS,gameMode,difficulty).map(m=>m.id));
+ const guesses=staleProgress?[]:[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>allowedIds.has(id)))];
+ return {gameMode,playMode,difficulty,targetId,guesses,hintCount:staleProgress?0:Math.min(6,Math.max(0,Number(prior.hintCount)||0),getAvailableHintCount(guesses.length)),message:''};
 }
 const initialGame=MODES.some(m=>m.id===stored('petrodle:gameMode','classic'))?stored('petrodle:gameMode','classic'):'classic';
-let state=load(initialGame,stored('petrodle:runMode','daily')==='training'?'training':'daily');
+const initialDifficulty=DIFFICULTIES.some(d=>d.id===stored('petrodle:difficulty','easy'))?stored('petrodle:difficulty','easy'):'easy';
+let state=load(initialGame,stored('petrodle:runMode','daily')==='training'?'training':'daily',initialDifficulty);
 function refreshDailyDate() {
  const currentDay = getLocalDateKey();
  if (currentDay === today) return false;
  cancelReveal();
  today = currentDay;
- if (state.playMode === 'daily') state = load(state.gameMode, 'daily');
+ if (state.playMode === 'daily') state = load(state.gameMode, 'daily',state.difficulty);
  return true;
 }
 let view='home';
@@ -944,7 +973,7 @@ let revealingGuessId=null, revealTimers=[];
 let celebrationPending=false;
 function cancelReveal(){revealTimers.forEach(clearTimeout);revealTimers=[];revealingGuessId=null;}
 function status(){return getPlayableState(state.gameMode,state.guesses,state.targetId);}
-function persist(){save(stateKey(state.gameMode,state.playMode),{targetId:state.targetId,guesses:state.guesses,hintCount:state.hintCount});save('petrodle:gameMode',state.gameMode);save('petrodle:runMode',state.playMode);}
+function persist(){save(stateKey(state.gameMode,state.playMode,state.difficulty),{targetId:state.targetId,guesses:state.guesses,hintCount:state.hintCount});save('petrodle:gameMode',state.gameMode);save('petrodle:runMode',state.playMode);save('petrodle:difficulty',state.difficulty);}
 function discoveries(){return stored('petrodle:discovered',[]).filter(id=>byId.has(id));}
 function discover(id){save('petrodle:discovered',[...new Set([...discoveries(),id])]);}
 function displayValue(m,key){
@@ -970,9 +999,8 @@ function classicBoard(){
  return `<div class="board-scroll" role="region" tabindex="0" aria-label="Tabela química e óptica dos palpites"><table class="guess-board"><thead><tr><th>Mineral</th>${BOARD_COLUMNS.map(col=>`<th class="head-${col.group}">${esc(col.label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function challengeImage(){
- const pair=getPhotoPair(byId.get(state.targetId));if(!pair)return '';
- const cards=[['PPL','Luz polarizada plana (nicóis descruzados)',pair.ppl],['XPL','Polarizadores cruzados (nicóis cruzados)',pair.xpl]];
- return `<div class="image-stage"><div class="photo-pair" role="group" aria-label="Duas fotomicrografias do mineral secreto, em PPL e XPL">${cards.map(([abbr,label,im])=>`<figure class="photo-pair-item"><figcaption class="photo-pair-label"><strong>${abbr}</strong><span>${label}</span></figcaption><div class="challenge-photo-frame"><img class="challenge-photo" src="${esc(im.src)}" alt="Fotomicrografia do mineral secreto em ${abbr}"></div></figure>`).join('')}</div><div class="image-stage-caption">Fotomicrografias do Guia Frank (UFRGS) · PPL p. ${pair.ppl.page} · XPL p. ${pair.xpl.page}</div></div>`;
+ const images=getPhotoImages(byId.get(state.targetId));if(!images)return '';
+ return `<div class="image-stage"><div class="photo-pair" role="group" aria-label="Duas fotomicrografias do mineral secreto">${images.map((im,i)=>`<figure class="photo-pair-item"><div class="challenge-photo-frame"><img class="challenge-photo" src="${esc(im.src)}" alt="Fotomicrografia ${i+1} do mineral secreto"></div></figure>`).join('')}</div><div class="image-stage-caption">Fotomicrografias do Guia Frank (UFRGS)</div></div>`;
 }
 function challengeClues(){
  const clues=buildProgressiveClues(byId.get(state.targetId));
@@ -1023,7 +1051,7 @@ function header(){
 }
 function home(){
  const count=discoveries().length;
- const summaries=getDailyModeSummary(MINERALS,MODES,today,mode=>stored(stateKey(mode,'daily'),{}));
+ const summaries=getDailyModeSummary(MINERALS,MODES,today,mode=>stored(stateKey(mode,'daily',state.difficulty),{}),state.difficulty);
  const cover=getMenuCoverImage(MINERALS,today,'classic');
  const badges={won:'Concluído',lost:'Encerrado',playing:'Em andamento',available:'Jogar'};
  return `<div class="hub"><section class="hub-hero"><div class="hub-hero-copy"><span class="hub-kicker"><span class="kicker-dot"></span> UM MINERAL POR DIA</span><h1>Qual é o <span>mineral?</span></h1><p>Três modos de jogar. Um mineral diferente em cada desafio diário.</p><div class="hero-quick"><span>${icon('calendar',15)} Desafio #${getPuzzleNumber(today)}</span><span>${icon('book',15)} ${playable.length} minerais</span></div></div><div class="hero-decor" aria-hidden="true">${cover?`<img src="${cover.src}" alt="">`:''}<div class="hero-prism">${logo}</div><span class="hero-decor-star star-one">✦</span><span class="hero-decor-star star-two">✧</span></div></section><section class="hub-choices"><div class="hub-section-heading"><div><span class="eyebrow">TRÊS DESAFIOS TODOS OS DIAS</span><h2>Escolha sua partida</h2></div><span class="hub-progress">${summaries.filter(m=>m.status==='won').length} / ${summaries.length} concluídos hoje</span></div><div class="hub-mode-grid">${summaries.map((m,i)=>{const pic=getMenuCoverImage(MINERALS,today,m.id);return `<button class="hub-card hub-${m.id}" type="button" data-game-mode="${m.id}"><span class="hub-card-art">${pic?`<img src="${pic.src}" alt="" loading="lazy">`:''}<span class="hub-card-art-icon">${icon(m.icon,29)}</span></span><span class="hub-card-copy"><span class="hub-card-topline"><b>${esc(m.name)}</b><span class="hub-card-status status-${m.status}">${badges[m.status]}</span></span><span class="hub-card-sub">${esc(m.subtitle)}</span><span class="hub-card-foot">${m.status==='won'?`${m.attempts} palpites`:m.status==='lost'?'Consultar resposta':m.status==='playing'?`Continuar · ${m.attempts} palpites` :'Jogar agora'} ${icon('right',16)}</span></span></button>`;}).join('')}</div></section><div class="hub-bottom"><div><span class="hub-bottom-ico">${icon('trophy',19)}</span><span><b>Sua coleção mineralógica</b><small>${count} de ${playable.length} minerais identificados</small></span></div><div class="hub-progress-track"><span style="width:${Math.round(100*count/playable.length)}%"></span></div></div></div>`;
@@ -1039,8 +1067,8 @@ function gameShell(){
 function footer(){return `<footer class="sources"><p>Petrodle · Mineralogia óptica</p><div class="source-links"><span>Fonte: Heinrich T. Frank (UFRGS, 2018) · Fotografias do guia para uso não comercial</span></div></footer></main>`;}
 function mainGame(){
  const game=MODES.find(m=>m.id===state.gameMode),res=status(),isDaily=state.playMode==='daily',locked=Boolean(revealingGuessId);
- const description={classic:'Compare as propriedades do seu palpite com as do mineral secreto.',photo:'Compare as imagens PPL e XPL do mineral secreto. Você tem 8 tentativas.',description:'Leia a pista inicial e identifique o mineral em até 8 tentativas.'};
- return `<section class="main-card" aria-label="Jogo ${esc(game.name)}"><div class="game-top"><div class="game-top-row"><div class="game-name"><span class="game-name-icon">${icon(game.icon,16)}</span> ${esc(game.name)} <span class="game-count">· ${isDaily?'Desafio #'+getPuzzleNumber(today):'Treino livre'}</span></div><div class="mode-switch"><button class="mode ${isDaily?'active':''}" data-run-mode="daily" aria-pressed="${isDaily}">${icon('calendar',14)} Diário</button><button class="mode ${!isDaily?'active':''}" data-run-mode="training" aria-pressed="${!isDaily}">${icon('shuffle',14)} Treino</button></div></div><p class="game-desc">${description[state.gameMode]}</p></div>${state.gameMode!=='classic'?otherBoard().split('<div class="board-intro">')[0]:''}<div class="prompt-zone"><div class="field-label"><label for="guess-input">Qual é o mineral?</label><small>${locked?'Revelando propriedades…':res.ended?'Partida encerrada':`${state.gameMode==='classic'?'Sem limite de tentativas':`${Math.max(0,8-state.guesses.length)} tentativas restantes`}`}</small></div><div class="guess-form"><div class="suggestion-wrap"><input class="guess-input" id="guess-input" type="text" placeholder="Busque um mineral pelo nome..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" ${res.ended||locked?'disabled':''}><span class="search-icon">${icon('search',18)}</span><div class="suggestions" id="suggestions" role="listbox"></div></div><button class="submit" id="submit" ${res.ended||locked?'disabled':''}>Tentar ${icon('right',17)}</button></div><div class="message" id="message" role="status">${esc(state.message)}</div><span id="reveal-progress" class="sr-only" aria-live="off"></span></div>${state.gameMode==='classic'?`<div class="board-intro"><strong>Seus palpites</strong><span class="board-description">Verde: igual · amarelo: parcial · vermelho: diferente</span><span>${state.guesses.length} tentativas</span></div>${classicBoard()}`:otherBoard().split('<div class="board-intro">')[1] ? '<div class="board-intro">'+otherBoard().split('<div class="board-intro">')[1] : ''}${hintSection()}${res.ended&&!locked?resultBanner():''}<div class="board-footer"><span class="small-note">${res.ended?'Consulte a ficha mineralógica abaixo.':'Busque um mineral e confirme seu palpite. Nomes já tentados não contam novamente.'}</span>${state.playMode==='training'&&!locked?`<button id="next" class="text-action">${icon('shuffle',14)} Trocar mineral</button>`:''}</div></section>${profile()}`;
+ const description={classic:'Compare as propriedades do seu palpite com as do mineral secreto.',photo:'Compare duas fotomicrografias do mineral secreto. Você tem 8 tentativas.',description:'Leia a pista inicial e identifique o mineral em até 8 tentativas.'};
+ return `<section class="main-card" aria-label="Jogo ${esc(game.name)}"><div class="game-top"><div class="game-top-row"><div class="game-name"><span class="game-name-icon">${icon(game.icon,16)}</span> ${esc(game.name)} <span class="game-count">· ${isDaily?'Desafio #'+getPuzzleNumber(today):'Treino livre'}</span></div><div class="game-controls"><div class="mode-switch"><button class="mode ${isDaily?'active':''}" data-run-mode="daily" aria-pressed="${isDaily}">${icon('calendar',14)} Diário</button><button class="mode ${!isDaily?'active':''}" data-run-mode="training" aria-pressed="${!isDaily}">${icon('shuffle',14)} Treino</button></div><label class="difficulty-control" for="difficulty"><span>Dificuldade</span><select id="difficulty" class="difficulty-select" aria-label="Dificuldade">${DIFFICULTIES.map(d=>`<option value="${d.id}" ${state.difficulty===d.id?'selected':''}>${esc(d.name)}</option>`).join('')}</select></label></div></div><p class="game-desc">${description[state.gameMode]}</p></div>${state.gameMode!=='classic'?otherBoard().split('<div class="board-intro">')[0]:''}<div class="prompt-zone"><div class="field-label"><label for="guess-input">Qual é o mineral?</label><small>${locked?'Revelando propriedades…':res.ended?'Partida encerrada':`${state.gameMode==='classic'?'Sem limite de tentativas':`${Math.max(0,8-state.guesses.length)} tentativas restantes`}`}</small></div><div class="guess-form"><div class="suggestion-wrap"><input class="guess-input" id="guess-input" type="text" placeholder="Busque um mineral pelo nome..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" ${res.ended||locked?'disabled':''}><span class="search-icon">${icon('search',18)}</span><div class="suggestions" id="suggestions" role="listbox"></div></div><button class="submit" id="submit" ${res.ended||locked?'disabled':''}>Tentar ${icon('right',17)}</button></div><div class="message" id="message" role="status">${esc(state.message)}</div><span id="reveal-progress" class="sr-only" aria-live="off"></span></div>${state.gameMode==='classic'?`<div class="board-intro"><strong>Seus palpites</strong><span class="board-description">Verde: igual · amarelo: parcial · vermelho: diferente</span><span>${state.guesses.length} tentativas</span></div>${classicBoard()}`:otherBoard().split('<div class="board-intro">')[1] ? '<div class="board-intro">'+otherBoard().split('<div class="board-intro">')[1] : ''}${hintSection()}${res.ended&&!locked?resultBanner():''}<div class="board-footer"><span class="small-note">${res.ended?'Consulte a ficha mineralógica abaixo.':'Busque um mineral e confirme seu palpite. Nomes já tentados não contam novamente.'}</span>${state.playMode==='training'&&!locked?`<button id="next" class="text-action">${icon('shuffle',14)} Trocar mineral</button>`:''}</div></section>${profile()}`;
 }
 function hintSection(){
  if(status().ended)return '';
@@ -1054,7 +1082,7 @@ function hintSection(){
  return `<section class="hints-section" aria-label="Dicas progressivas"><div class="hints-heading"><span class="hints-heading-icon">${icon('light',18)}</span><div><strong>Dicas</strong><small>Uma dica opcional a cada 3 palpites</small></div><span class="hints-counter">${used} utilizadas · ${remaining} disponíveis</span></div>${shown.length?`<div class="hints-revealed">${shown.map((c,i)=>`<div class="hint-entry"><span>${i+1}</span><p><b>${esc(c.title)}</b>${esc(c.value)}</p></div>`).join('')}</div>`:''}<div class="hints-footer">${remaining?`<button type="button" id="hint" class="hint-claim">${icon('light',16)} Pedir dica (${remaining} disponível${remaining===1?'':'is'})</button>`:earned>=clues.length?`<span>Todas as dicas deste modo foram liberadas.</span>`:`<span>${next} ${next===1?'palpite':'palpites'} para liberar ${used===0?'a primeira':'outra'} dica</span>`}</div></section>`;
 }
 function resultBanner(){const r=status(),m=byId.get(state.targetId);return `<section class="result" aria-live="polite"><div class="result-head"><div class="result-icon">${icon(r.won?'trophy':'help',20)}</div><div><h3>${r.won?'Identificação correta':'Fim das tentativas'}: ${esc(m.name)}</h3><p>${state.guesses.length} ${state.guesses.length===1?'palpite':'palpites'} · ${r.won?'Mineral adicionado à coleção.':'Veja a ficha mineralógica para conferir a resposta.'}</p></div></div><div class="result-actions"><button id="share" class="solid-small">${icon('copy',14)} Compartilhar resultado</button>${state.playMode==='training'?'<button id="next-result" class="outline-small">Próximo mineral →</button>':''}</div></section>`;}
-function dialogs(){return `<dialog class="dialog" id="help-dialog"><div class="dialog-top"><h2>Como jogar</h2><button id="close-help" class="dialog-close" aria-label="Fechar">×</button></div><div class="dialog-body"><p><b>Descubra o mineral secreto.</b> Escolha um modo, observe as pistas e confirme seus palpites. Cada modo tem um desafio diário próprio. Em <b>Treino</b>, você pode iniciar novas partidas.</p><ol><li><b>Clássico:</b> compare 11 propriedades na tabela. Os palpites são ilimitados.</li><li><b>Imagem:</b> compare duas fotomicrografias, uma em luz polarizada plana (PPL) e outra sob polarizadores cruzados (XPL). Você tem até 8 tentativas.</li><li><b>Descrição:</b> identifique o mineral a partir de uma pista textual. Você tem até 8 tentativas.</li></ol><p><b>Cores do Clássico:</b> verde é igual, amarelo é parcial, vermelho é diferente e cinza indica ausência de comparação. As setas ↑/↓ mostram se o valor procurado é maior ou menor.</p><p><b>Dicas:</b> a cada 3 palpites, você pode revelar uma nova pista opcional. Repetir um mineral não consome uma tentativa.</p><p><b>Como buscar:</b> digite um nome, percorra as sugestões com ↑/↓ e confirme com Enter. Esc fecha a lista. No celular, toque em uma sugestão e depois em <b>Tentar</b>.</p><p class="dialog-note"><b>Nota mineralógica.</b> Incolor ou colorido refere-se à luz polarizada plana (PPL), não às cores de interferência em nicóis cruzados (XPL). As propriedades podem variar e não substituem uma análise petrográfica completa. Grupos mineralógicos são apenas referências de consulta.</p></div></dialog>${catalogDialog()}<div id="toast" class="toast" role="status" aria-live="polite"></div>`;}
+function dialogs(){return `<dialog class="dialog" id="help-dialog"><div class="dialog-top"><h2>Como jogar</h2><button id="close-help" class="dialog-close" aria-label="Fechar">×</button></div><div class="dialog-body"><p><b>Descubra o mineral secreto.</b> Escolha um modo, observe as pistas e confirme seus palpites. Cada modalidade e dificuldade têm um desafio diário próprio. Fácil contém 15 minerais, Médio contém 45 e Difícil inclui todas as espécies da base disponíveis na modalidade. Em <b>Treino</b>, você pode iniciar novas partidas.</p><ol><li><b>Clássico:</b> compare 11 propriedades na tabela. Os palpites são ilimitados.</li><li><b>Imagem:</b> compare duas fotomicrografias, que podem ter sido obtidas na mesma condição de iluminação. Você tem até 8 tentativas.</li><li><b>Descrição:</b> identifique o mineral a partir de uma pista textual. Você tem até 8 tentativas.</li></ol><p><b>Cores do Clássico:</b> verde é igual, amarelo é parcial, vermelho é diferente e cinza indica ausência de comparação. As setas ↑/↓ mostram se o valor procurado é maior ou menor.</p><p><b>Dicas:</b> a cada 3 palpites, você pode revelar uma nova pista opcional. Repetir um mineral não consome uma tentativa.</p><p><b>Como buscar:</b> digite um nome, percorra as sugestões com ↑/↓ e confirme com Enter. Esc fecha a lista. No celular, toque em uma sugestão e depois em <b>Tentar</b>.</p><p class="dialog-note"><b>Nota mineralógica.</b> Incolor ou colorido refere-se à luz polarizada plana (PPL), não às cores de interferência em nicóis cruzados (XPL). As propriedades podem variar e não substituem uma análise petrográfica completa. Grupos mineralógicos são apenas referências de consulta.</p></div></dialog>${catalogDialog()}<div id="toast" class="toast" role="status" aria-live="polite"></div>`;}
 function render(){
  refreshDailyDate();
  root.innerHTML=header()+(view==='home'?home():gameShell())+footer()+dialogs();
@@ -1115,7 +1143,7 @@ function startReveal(){
 
 function msg(s){state.message=s;document.getElementById('message').textContent=s;}
 function showSuggestions(){const input=document.getElementById('guess-input'),menu=document.getElementById('suggestions');if(!input||status().ended||revealingGuessId)return;
- suggestionItems=searchMinerals(MINERALS,input.value,9).filter(m=>!state.guesses.includes(m.id));
+ suggestionItems=searchMinerals(getDifficultyGuesses(MINERALS,state.gameMode,state.difficulty),input.value,9).filter(m=>!state.guesses.includes(m.id));
  menu.innerHTML=suggestionItems.map((m,i)=>{
    const im=getSuggestionImage(m),local=getOfflineFallback(m)||m.images.find(x=>x.src?.startsWith('data:image/'));
    const base=local||im;
@@ -1136,7 +1164,7 @@ function hideSuggestions(){const menu=document.getElementById('suggestions'),inp
 function pickSuggestion(id){const m=byId.get(id);if(!m)return;document.getElementById('guess-input').value=m.name;hideSuggestions();msg(`Selecionado: ${m.name}. Confirme o palpite.`);}
 function guess(){
  if(status().ended||revealingGuessId)return;
- const result=resolveGuess(MINERALS,document.getElementById('guess-input').value,state.guesses);
+ const result=resolveGuess(getDifficultyGuesses(MINERALS,state.gameMode,state.difficulty),document.getElementById('guess-input').value,state.guesses);
  if(result.status==='empty'){msg('Digite um mineral para começar.');return;}
  if(result.status==='choose'){msg('Escolha um mineral da lista antes de tentar.');showSuggestions();return;}
  if(result.status==='duplicate'){msg('Você já tentou esse mineral. Escolha outro.');return;}
@@ -1150,16 +1178,18 @@ function guess(){
  revealingGuessId=state.gameMode==='classic'?m.id:null;
  persist();render();
 }
-function changeGame(mode){if(!MODES.some(m=>m.id===mode))return;cancelReveal();if(state.gameMode!==mode)state=load(mode,state.playMode);view='game';persist();render();window.scrollTo?.({top:0,behavior:'instant'});}
-function changeRun(mode){if(state.playMode===mode)return;cancelReveal();state=load(state.gameMode,mode);persist();render();}
-function nextTraining(){cancelReveal();state=load(state.gameMode,'training');state.targetId=chooseTraining(state.gameMode,state.targetId);state.guesses=[];state.hintCount=0;persist();render();}
+function changeGame(mode){if(!MODES.some(m=>m.id===mode))return;cancelReveal();if(state.gameMode!==mode)state=load(mode,state.playMode,state.difficulty);view='game';persist();render();window.scrollTo?.({top:0,behavior:'instant'});}
+function changeRun(mode){if(state.playMode===mode)return;cancelReveal();state=load(state.gameMode,mode,state.difficulty);persist();render();}
+function changeDifficulty(difficulty){if(!DIFFICULTIES.some(d=>d.id===difficulty)||state.difficulty===difficulty)return;cancelReveal();state=load(state.gameMode,state.playMode,difficulty);persist();render();}
+function nextTraining(){cancelReveal();state=load(state.gameMode,'training',state.difficulty);state.targetId=chooseTraining(state.gameMode,state.targetId,state.difficulty);state.guesses=[];state.hintCount=0;persist();render();}
 function toast(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),2500);}
-async function share(){const r=status(),title=MODES.find(m=>m.id===state.gameMode).name;const text=`Petrodle ${title} ${state.playMode==='daily'?'#'+getPuzzleNumber(today):'Treino'}\n${r.won?'✅':'⬜'} ${state.guesses.length} tentativas\n${state.guesses.map(id=>id===state.targetId?'🟩':'⬛').join('')}\n#Petrodle`;
+async function share(){const r=status(),title=MODES.find(m=>m.id===state.gameMode).name;const text=`Petrodle ${title} · ${DIFFICULTIES.find(d=>d.id===state.difficulty).name} ${state.playMode==='daily'?'#'+getPuzzleNumber(today):'Treino'}\n${r.won?'✅':'⬜'} ${state.guesses.length} tentativas\n${state.guesses.map(id=>id===state.targetId?'🟩':'⬛').join('')}\n#Petrodle`;
  try{await navigator.clipboard.writeText(text);toast('Resultado copiado.');}catch{const ta=document.createElement('textarea');ta.value=text;document.body.append(ta);ta.select();const ok=document.execCommand('copy');ta.remove();toast(ok?'Resultado copiado.':'Não foi possível copiar.');}}
 function bind(){
  document.querySelectorAll('[data-home]').forEach(el=>el.addEventListener('click',()=>{cancelReveal();view='home';render();window.scrollTo?.({top:0,behavior:'instant'});}));
  document.querySelectorAll('[data-game-mode]').forEach(el=>el.addEventListener('click',()=>changeGame(el.dataset.gameMode)));
  document.querySelectorAll('[data-run-mode]').forEach(el=>el.addEventListener('click',()=>changeRun(el.dataset.runMode)));
+ document.getElementById('difficulty')?.addEventListener('change',e=>changeDifficulty(e.target.value));
  document.getElementById('catalog-link').addEventListener('click',()=>{document.getElementById('catalog-dialog').showModal();showCatalog();document.getElementById('catalog-search').focus();});
  document.getElementById('close-catalog').addEventListener('click',()=>document.getElementById('catalog-dialog').close());
  document.getElementById('catalog-search').addEventListener('input',e=>showCatalog(e.target.value));
