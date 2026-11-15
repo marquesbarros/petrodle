@@ -847,6 +847,8 @@ function getDailyModeSummary(minerals, modes, date, readProgress) {
   const progress = readProgress(mode.id) || {};
   const guesses = Array.isArray(progress.guesses) ? [...new Set(progress.guesses)] : [];
   const targetId = getModeDailyId(minerals,date,mode.id);
+  // Desconsiderar o progresso de um desafio cuja resposta mudou após atualização do catálogo.
+  if(progress.targetId && progress.targetId!==targetId)guesses.length=0;
   const won=guesses.includes(targetId);
   return {...mode, attempts:guesses.length, status:won?'won':mode.id!=='classic'&&guesses.length>=8?'lost':guesses.length?'playing':'available'};
  });
@@ -914,8 +916,9 @@ function chooseTraining(gameMode,previous){const options=getEligibleForMode(MINE
 function load(gameMode,playMode){
  const prior=stored(stateKey(gameMode,playMode),{});
  const targetId=playMode==='daily'?getModeDailyId(MINERALS,today,gameMode):(getEligibleForMode(MINERALS,gameMode).some(m=>m.id===prior.targetId)?prior.targetId:chooseTraining(gameMode));
- const guesses=[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>isGuessable(byId.get(id))))];
- return {gameMode,playMode,targetId,guesses,hintCount:Math.min(6,Math.max(0,Number(prior.hintCount)||0),getAvailableHintCount(guesses.length)),message:''};
+ const staleProgress=Boolean(prior.targetId&&prior.targetId!==targetId);
+ const guesses=staleProgress?[]:[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>isGuessable(byId.get(id))))];
+ return {gameMode,playMode,targetId,guesses,hintCount:staleProgress?0:Math.min(6,Math.max(0,Number(prior.hintCount)||0),getAvailableHintCount(guesses.length)),message:''};
 }
 const initialGame=MODES.some(m=>m.id===stored('petrodle:gameMode','classic'))?stored('petrodle:gameMode','classic'):'classic';
 let state=load(initialGame,stored('petrodle:runMode','daily')==='training'?'training':'daily');
