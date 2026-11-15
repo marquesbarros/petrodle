@@ -49,8 +49,8 @@ assert.equal(resolveGuess(MINERALS, 'Biotita', ['biotita']).status, 'duplicate',
   'Biotita não deve consumir uma segunda tentativa');
 assert.equal(resolveGuess(MINERALS, 'Granada').status, 'choose',
   'Outros grupos não devem tornar-se palpites por acidente');
-assert.match(html, /filter\(id=>isGuessable\(byId\.get\(id\)\)\)/,
-  'Palpites de biotita devem ser recuperados após recarregar a página');
+assert.match(html, /getDifficultyGuesses\(MINERALS,gameMode,difficulty\)/,
+  'Palpites persistidos devem ser validados contra a dificuldade escolhida');
 
 assert.deepEqual(Array.from(MODES, m => m.id), ['classic', 'photo', 'description'],
   'Clássico e Descrição devem ser preservados; Silhueta e Pixel dão lugar a Imagem');
