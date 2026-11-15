@@ -23,5 +23,7 @@ jobs:
         run: node tests/daily-and-clues.test.cjs index.html
       - name: Verificar os três modos
         run: node tests/three-modes.test.cjs index.html
+      - name: Verificar pares ópticos PPL e XPL
+        run: node tests/ppl-xpl.test.cjs index.html
       - name: Verificar identidade visual e integração do jogo
         run: node tests/visual-theme.test.cjs
