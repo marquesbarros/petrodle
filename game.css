@@ -86,7 +86,11 @@ button:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visibl
 .collection-compact{border-left:1px solid #a9bba9}.collection-compact span{color:#306247;font-weight:850}
 .main-card{background:#fffdf5;border:2px solid #263f30;border-radius:5px;box-shadow:5px 5px 0 #263f30;overflow:visible}
 .game-top{background:#f0efe3;padding:15px 20px;border-bottom:2px solid #d7e0d2}
-.game-top-row{justify-content:space-between}
+.game-top-row{justify-content:space-between;flex-wrap:wrap;gap:10px}
+.game-controls{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.difficulty-control{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#476354}
+.difficulty-select{background:#fffdf5;border:1px solid #91ab95;border-radius:4px;color:#294535;font:800 12px "Trebuchet MS",Verdana,sans-serif;padding:9px 27px 9px 10px;min-width:99px;cursor:pointer}
+.difficulty-select:focus-visible{outline:3px solid #e3a940;outline-offset:2px}
 .game-name{display:flex;font-size:14px;font-weight:850;color:#2a4837}
 .game-name-icon{border-radius:3px;border:1px solid #a7c5ab;background:#d6e7d3}
 .game-count{color:#63776a;font-weight:650}
@@ -739,20 +743,16 @@ body{
   .result-profile .photo-gallery img{max-height:none}
 }
 
-/* Modo Imagem: comparacao simultanea das imagens PPL e XPL. */
+/* Modo Imagem: duas fotografias sem rótulos de iluminação. */
 .image-stage{max-width:1100px;width:100%;margin-inline:auto}
 .photo-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
 .photo-pair-item{margin:0;min-width:0}
-.photo-pair-label{display:flex;align-items:baseline;gap:9px;min-height:27px;margin:0 0 10px;color:#244e5a}
-.photo-pair-label strong{font-size:14px;letter-spacing:.08em;font-weight:900}
-.photo-pair-label span{font-size:11px;line-height:1.4;color:#56747b}
 .photo-pair-item .challenge-photo-frame{width:100%;height:clamp(200px,34vw,435px);min-height:0;max-height:none;overflow:hidden}
 .photo-pair-item .challenge-photo{display:block;width:100%;height:100%;max-width:100%;max-height:none;object-fit:contain}
 @media(max-width:680px){
  .photo-pair{gap:8px}
- .photo-pair-label{margin-bottom:6px;min-height:21px}
- .photo-pair-label strong{font-size:12px}
- .photo-pair-label span{display:none}
- .photo-pair-item .challenge-photo-frame{height:clamp(155px,45vw,255px)}
+ .game-controls{width:100%;justify-content:space-between}
+ .difficulty-control{gap:5px}
+    .photo-pair-item .challenge-photo-frame{height:clamp(155px,45vw,255px)}
  .photo-pair-item .challenge-photo{object-fit:contain}
 }
