@@ -6,13 +6,13 @@ const root = path.resolve(__dirname, '..');
 const html = readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = readFileSync(path.join(root, 'game.css'), 'utf8');
 
-assert.match(html, /<link rel="stylesheet" href="game\.css\?v=3">/,
+assert.match(html, /<link rel="stylesheet" href="game\.css\?v=4">/,
   'O tema publicado deve ser carregado pelo jogo');
 assert.match(html, /const MODES = Object\.freeze\(\[/,
   'As modalidades de jogo devem permanecer na interface');
 for (const id of ['classic', 'photo', 'description'])
   assert.match(html, new RegExp("id:'" + id + "'"));
-assert.match(html, /Três modos de jogar/);
+assert.match(html, /MODOS DE JOGO/, 'A apresentação deve identificar as modalidades sem duplicar chamadas diárias');
 assert.match(html, /Escolha sua partida/);
 assert.match(html, /function classicBoard\(/);
 assert.match(html, /function challengeImage\(/);

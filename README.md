@@ -94,6 +94,7 @@ node tests/daily-and-clues.test.cjs index.html
 node tests/three-modes.test.cjs index.html
 node tests/ppl-xpl.test.cjs index.html
 node tests/difficulty.test.cjs index.html
+node tests/landing-and-credits.test.cjs index.html
 node tests/visual-theme.test.cjs
 ```
 
