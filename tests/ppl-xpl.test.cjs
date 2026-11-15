@@ -11,9 +11,9 @@ assert.ok(start >= 0 && end > start, 'Lógica principal do jogo deve estar dispo
 
 const ctx = {};
 vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MINERALS, getPhotoPair, getEligibleForMode};',
+  '\nglobalThis.__test = {MINERALS, MODES, getPhotoPair, getEligibleForMode, getModeDailyId, getDailyModeSummary};',
   ctx, {timeout: 30000});
-const {MINERALS, getPhotoPair, getEligibleForMode} = ctx.__test;
+const {MINERALS, getPhotoPair, getEligibleForMode, getModeDailyId, getDailyModeSummary} = ctx.__test;
 const byId = new Map(MINERALS.map(m => [m.id, m]));
 const photo = getEligibleForMode(MINERALS, 'photo');
 
@@ -42,6 +42,16 @@ const barita = byId.get('barita');
 assert.equal(getPhotoPair(barita).ppl.src, barita.images[1].src,
   'A primeira foto de barita está em NC, logo a ordem deve ser invertida');
 assert.equal(getPhotoPair(barita).xpl.src, barita.images[0].src);
+
+// Uma partida antiga pode ter outro alvo após a curadoria de pares.
+const day='2026-11-15';
+const currentTarget=getModeDailyId(MINERALS,day,'photo');
+const migrated=getDailyModeSummary(MINERALS,[{id:'photo'}],day,
+  ()=>({targetId:'alvo-anterior',guesses:[currentTarget]}));
+assert.equal(migrated[0].status,'available',
+  'Um palpite antigo não pode vencer indevidamente o novo desafio');
+assert.match(html, /const staleProgress=Boolean\\(prior\\.targetId&&prior\\.targetId!==targetId\\)/,
+  'Partidas persistidas com outro alvo devem descartar palpites antigos');
 
 const stage = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function challengeClues()'));
 assert.match(stage, /photo-pair/);
