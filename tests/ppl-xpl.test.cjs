@@ -43,6 +43,30 @@ assert.equal(getPhotoPair(barita).ppl.src, barita.images[1].src,
   'A primeira foto de barita está em NC, logo a ordem deve ser invertida');
 assert.equal(getPhotoPair(barita).xpl.src, barita.images[0].src);
 
+// Regressão: pares adicionais conferidos nas legendas ND/NC do Guia Frank.
+// A ordem das imagens no arquivo nem sempre corresponde a PPL → XPL.
+const verifiedFromGuide = [
+  ['anidrita', 1, 0, 16, 15],
+  ['cloritoide', 0, 1, 61, 61],
+  ['eudialita', 1, 0, 88, 88],
+  ['glauconita', 0, 1, 100, 100],
+  ['goethita', 0, 1, 101, 101],
+  ['prehnita', 1, 0, 168, 167],
+  ['rhodochrosita', 0, 1, 172, 172],
+  ['titanita', 1, 0, 193, 193]
+];
+for (const [id, pplIndex, xplIndex, pplPage, xplPage] of verifiedFromGuide) {
+  const mineral = byId.get(id);
+  assert.ok(mineral?.playable, id + ': o mineral precisa ser uma resposta elegível');
+  const pair = getPhotoPair(mineral);
+  assert.ok(pair, id + ': o par PPL/XPL deve estar disponível');
+  assert.equal(pair.ppl.src, mineral.images[pplIndex].src, id + ': imagem PPL incorreta');
+  assert.equal(pair.xpl.src, mineral.images[xplIndex].src, id + ': imagem XPL incorreta');
+  assert.equal(pair.ppl.page, pplPage, id + ': página da imagem PPL incorreta');
+  assert.equal(pair.xpl.page, xplPage, id + ': página da imagem XPL incorreta');
+}
+assert.ok(photo.length >= 58, 'A curadoria deve disponibilizar pelo menos 58 espécies no modo Imagem');
+
 // Uma partida antiga pode ter outro alvo após a curadoria de pares.
 const day='2026-11-15';
 const currentTarget=getModeDailyId(MINERALS,day,'photo');
