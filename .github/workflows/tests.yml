@@ -25,5 +25,7 @@ jobs:
         run: node tests/three-modes.test.cjs index.html
       - name: Verificar pares ópticos PPL e XPL
         run: node tests/ppl-xpl.test.cjs index.html
+      - name: Verificar níveis de dificuldade e fotografias
+        run: node tests/difficulty.test.cjs index.html
       - name: Verificar identidade visual e integração do jogo
         run: node tests/visual-theme.test.cjs
