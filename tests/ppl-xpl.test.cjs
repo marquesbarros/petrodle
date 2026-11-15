@@ -50,7 +50,7 @@ const migrated=getDailyModeSummary(MINERALS,[{id:'photo'}],day,
   ()=>({targetId:'alvo-anterior',guesses:[currentTarget]}));
 assert.equal(migrated[0].status,'available',
   'Um palpite antigo não pode vencer indevidamente o novo desafio');
-assert.match(html, /const staleProgress=Boolean\\(prior\\.targetId&&prior\\.targetId!==targetId\\)/,
+assert.match(html, /const staleProgress=Boolean\(prior\.targetId&&prior\.targetId!==targetId\)/,
   'Partidas persistidas com outro alvo devem descartar palpites antigos');
 
 const stage = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function challengeClues()'));
