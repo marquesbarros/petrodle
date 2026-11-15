@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '..');
 const html = readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = readFileSync(path.join(root, 'game.css'), 'utf8');
 
-assert.match(html, /<link rel="stylesheet" href="game\.css\?v=2">/,
+assert.match(html, /<link rel="stylesheet" href="game\.css\?v=3">/,
   'O tema publicado deve ser carregado pelo jogo');
 assert.match(html, /const MODES = Object\.freeze\(\[/,
   'As modalidades de jogo devem permanecer na interface');
