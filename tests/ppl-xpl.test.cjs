@@ -11,30 +11,37 @@ assert.ok(start >= 0 && end > start, 'Lógica principal do jogo deve estar dispo
 
 const ctx = {};
 vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MINERALS, MODES, getPhotoPair, getEligibleForMode, getModeDailyId, getDailyModeSummary};',
+  '\nglobalThis.__test = {MINERALS, MODES, getPhotoPair, getPhotoImages, getEligibleForMode, getModeDailyId, getDailyModeSummary};',
   ctx, {timeout: 30000});
-const {MINERALS, getPhotoPair, getEligibleForMode, getModeDailyId, getDailyModeSummary} = ctx.__test;
+const {MINERALS, getPhotoPair, getPhotoImages, getEligibleForMode, getModeDailyId, getDailyModeSummary} = ctx.__test;
 const byId = new Map(MINERALS.map(m => [m.id, m]));
 const photo = getEligibleForMode(MINERALS, 'photo');
 
 assert.ok(photo.length >= 40,
-  'O modo Imagem deve preservar um conjunto relevante de minerais com pares PPL/XPL');
-assert.ok(photo.every(m => m.playable && getPhotoPair(m)),
-  'Toda resposta sorteável deve possuir um par validado');
+  'O modo Imagem deve preservar um conjunto relevante de minerais com duas fotos');
+assert.ok(photo.every(m => m.playable && getPhotoImages(m)?.length === 2),
+  'Toda resposta deve ter duas fotografias verificadas e distintas');
 for (const mineral of photo) {
+  const images = getPhotoImages(mineral);
+  assert.equal(images.length, 2, mineral.name + ': duas fotografias');
+  assert.ok(images.every(im => im.src.startsWith('data:image/') && im.verifiedForSpecies !== false),
+    mineral.name + ': nenhuma foto pode ser genérica de grupo');
+  assert.notEqual(images[0].src, images[1].src, mineral.name + ': fotos distintas');
   const pair = getPhotoPair(mineral);
-  assert.ok(pair.ppl.src.startsWith('data:image/') && pair.xpl.src.startsWith('data:image/'),
-    mineral.name + ': fotos devem estar disponíveis sem conexão');
-  assert.ok(pair.ppl.verifiedForSpecies !== false && pair.xpl.verifiedForSpecies !== false,
-    mineral.name + ': ambas as fotos devem identificar a espécie');
-  assert.notEqual(pair.ppl.src, pair.xpl.src,
-    mineral.name + ': PPL e XPL não podem reutilizar a mesma imagem');
+  if (pair) {
+    assert.equal(images[0].src, pair.ppl.src, mineral.name + ': priorizar PPL verificado');
+    assert.equal(images[1].src, pair.xpl.src, mineral.name + ': priorizar XPL verificado');
+  }
 }
+assert.ok(photo.some(m => m.id === 'actinolita'), 'Actinolita com duas fotos PPL deve ser sorteável');
+assert.ok(photo.some(m => m.id === 'enstatita'), 'Enstatita com duas fotos verificadas deve ser sorteável');
 
 assert.equal(getPhotoPair(byId.get('actinolita')), null,
   'Duas fotos em PPL não devem ser rotuladas como PPL/XPL');
 assert.equal(getPhotoPair(byId.get('biotita')), null,
   'Fotos sem par NC verificado não devem ser classificadas como pares');
+assert.equal(getPhotoImages(byId.get('actinolita')).length, 2,
+  'Duas imagens PPL são suficientes sem declarar um falso par XPL');
 const andalusita = byId.get('andalusita');
 assert.equal(getPhotoPair(andalusita).ppl.src, andalusita.images[0].src);
 assert.equal(getPhotoPair(andalusita).xpl.src, andalusita.images[1].src);
@@ -79,14 +86,15 @@ assert.match(html, /const staleProgress=Boolean\(prior\.targetId&&prior\.targetI
 
 const stage = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function challengeClues()'));
 assert.match(stage, /photo-pair/);
-assert.match(stage, /pair\.ppl/);
-assert.match(stage, /pair\.xpl/);
+assert.match(stage, /getPhotoImages/);
+assert.doesNotMatch(stage, /photo-pair-label|pair\.ppl|pair\.xpl/,
+  'A tela de desafio não deve rotular iluminação nem pressupor um par');
 assert.match(stage, /<img class="challenge-photo"/);
-assert.match(stage, /alt="Fotomicrografia do mineral secreto em/);
+assert.match(stage, /alt="Fotomicrografia /);
 assert.doesNotMatch(stage, /grayscale\(|blur\(|pixel-canvas/,
   'Fotos devem continuar sem filtros');
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'game.css'), 'utf8');
 assert.match(css, /\.photo-pair\s*\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
   'O par deve ser exibido lado a lado sem restringir uma das fotos');
-console.log('OK: ' + photo.length + ' minerais com pares PPL/XPL verificados e renderização responsiva');
+console.log('OK: ' + photo.length + ' minerais com duas fotos, pares PPL/XPL priorizados e renderização responsiva');
