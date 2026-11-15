@@ -66,7 +66,7 @@ assert.match(html,/id="difficulty"/,'Seletor deve existir junto aos modos de par
 assert.match(html,/data-run-mode="daily"/,'O modo Diário deve permanecer');
 assert.match(html,/data-run-mode="training"/,'O modo Treino deve permanecer');
 assert.match(html,/petrodle:difficulty/,'Dificuldade persistida');
-assert.match(html,/legacy\+':'+difficulty/,'Chaves separadas entre níveis para não misturar progresso');
+assert.ok(html.includes("legacy+':'+difficulty"),'Chaves separadas entre níveis para não misturar progresso');
 const stage=html.slice(html.indexOf('function challengeImage()'),html.indexOf('function challengeClues()'));
 assert.doesNotMatch(stage,/photo-pair-label|pair\.ppl|pair\.xpl/,'As imagens não devem receber rótulos PPL/XPL');
 console.log('OK: dificuldades 15 / 45 / base inteira, fotos sem par, progresso e desafios independentes');
