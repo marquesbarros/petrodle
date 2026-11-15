@@ -24,6 +24,9 @@ Cada modalidade tem um desafio diário próprio. Se quiser continuar jogando, se
 
 No **modo Imagem**, o jogador vê duas fotomicrografias lado a lado: **PPL** (luz polarizada plana, nicóis descruzados) e **XPL** (polarizadores cruzados, nicóis cruzados). Os pares foram selecionados a partir das fotografias existentes do Guia Frank, respeitando a identificação de cada condição de iluminação. O sorteio dessa modalidade utiliza somente minerais com ambas as imagens verificadas. Fotos avulsas ou sequências apenas em PPL continuam no catálogo, mas não são rotuladas incorretamente como pares nem sorteadas nessa modalidade. A disponibilidade de pares não altera o conjunto de respostas dos modos Clássico e Descrição.
 
+**Cobertura fotográfica PPL/XPL:** 58 espécies elegíveis, após a incorporação de oito pares adicionais conferidos nas legendas do Guia Frank: anidrita, cloritóide, eudialita, glauconita, goethita, prehnita, rhodochrosita e titanita. Algumas fichas possuem somente fotos ND, somente fotos NC, fotografias não identificadas até o nível de espécie ou nenhuma fotomicrografia; elas permanecem fora do sorteio até que sejam incorporadas duas imagens com condições de iluminação verificadas.
+
+
 No **Clássico**, cada palpite produz uma linha na tabela. As indicações significam:
 
 | Indicação | Significado |
