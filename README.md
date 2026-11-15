@@ -7,25 +7,33 @@
 ## Como jogar
 
 1. **Escolha um modo:** Clássico, Imagem ou Descrição.
-2. **Observe a tabela, a fotografia ou a pista inicial**, conforme a modalidade escolhida.
-3. **Busque o nome de um mineral**, selecione uma sugestão e confirme o palpite.
-4. **Use o retorno para deduzir a resposta.** No Clássico, compare as propriedades; em Imagem e Descrição, refine suas hipóteses a cada tentativa.
-5. **Consulte a ficha mineralógica** ao fim da partida. As informações e fotografias do verbete permitem revisar a identificação.
+2. **Escolha a dificuldade:** Fácil (15 minerais), Médio (45) ou Difícil (todas as espécies jogáveis da base).
+3. **Observe a tabela, as fotografias ou a pista inicial**, conforme a modalidade escolhida.
+4. **Busque o nome de um mineral**, selecione uma sugestão e confirme o palpite.
+5. **Use o retorno para deduzir a resposta.** No Clássico, compare as propriedades; em Imagem e Descrição, refine suas hipóteses a cada tentativa.
+6. **Consulte a ficha mineralógica** ao fim da partida. As informações e fotografias do verbete permitem revisar a identificação.
 
-Cada modalidade tem um desafio diário próprio. Se quiser continuar jogando, selecione **Treino**, que permite iniciar novas partidas sem esperar o próximo dia.
+Cada combinação de modalidade e dificuldade tem um desafio diário próprio. Se quiser continuar jogando, selecione **Treino**, que permite iniciar novas partidas sem esperar o próximo dia.
 
 ## Modos de jogo
 
 | Modo | Objetivo | Tentativas |
 |---|---|---|
 | **Clássico** | Descobrir o mineral comparando 11 atributos químicos, cristalográficos e ópticos. | Ilimitadas |
-| **Imagem** | Identificar o mineral comparando duas fotomicrografias, PPL e XPL. | Até 8 |
+| **Imagem** | Identificar o mineral comparando duas fotomicrografias. | Até 8 |
 | **Descrição** | Identificar o mineral a partir da pista inicial e das pistas opcionais. | Até 8 |
 
-No **modo Imagem**, o jogador vê duas fotomicrografias lado a lado: **PPL** (luz polarizada plana, nicóis descruzados) e **XPL** (polarizadores cruzados, nicóis cruzados). Os pares foram selecionados a partir das fotografias existentes do Guia Frank, respeitando a identificação de cada condição de iluminação. O sorteio dessa modalidade utiliza somente minerais com ambas as imagens verificadas. Fotos avulsas ou sequências apenas em PPL continuam no catálogo, mas não são rotuladas incorretamente como pares nem sorteadas nessa modalidade. A disponibilidade de pares não altera o conjunto de respostas dos modos Clássico e Descrição.
+No **modo Imagem**, duas fotomicrografias verificadas da espécie são apresentadas lado a lado, **sem rótulos de PPL ou XPL**. Quando existe um par PPL/XPL conferido, ele é priorizado. Caso contrário, duas fotografias distintas da mesma espécie podem ser apresentadas, mesmo que tenham sido obtidas sob a mesma condição de iluminação. Fotos genéricas de grupos, imagens duplicadas e espécies com menos de duas fotomicrografias verificadas não entram no sorteio dessa modalidade.
 
-**Cobertura fotográfica PPL/XPL:** 58 espécies elegíveis, após a incorporação de oito pares adicionais conferidos nas legendas do Guia Frank: anidrita, cloritóide, eudialita, glauconita, goethita, prehnita, rhodochrosita e titanita. Algumas fichas possuem somente fotos ND, somente fotos NC, fotografias não identificadas até o nível de espécie ou nenhuma fotomicrografia; elas permanecem fora do sorteio até que sejam incorporadas duas imagens com condições de iluminação verificadas.
+## Dificuldade
 
+| Dificuldade | Minerais disponíveis |
+|---|---|
+| **Fácil** | 15 espécies introdutórias. |
+| **Médio** | 45 espécies: as 15 do Fácil e mais 30. |
+| **Difícil** | Todas as espécies jogáveis cadastradas na base, respeitando os requisitos da modalidade. |
+
+No Clássico e na Descrição, o Difícil utiliza todas as espécies disponíveis para esses modos. No modo Imagem, cada mineral ainda precisa de duas fotografias válidas. A escolha fica ao lado dos botões **Diário** e **Treino**. As sugestões de palpites são limitadas à dificuldade escolhida no Fácil e no Médio, e cada combinação possui progresso separado. O modo Difícil mantém a compatibilidade com os palpites e partidas anteriores. A coleção de minerais descobertos continua compartilhada.
 
 No **Clássico**, cada palpite produz uma linha na tabela. As indicações significam:
 
@@ -52,7 +60,7 @@ Digite um nome no campo de busca. Selecione um resultado e pressione **Tentar** 
 | Ver as instruções dentro do jogo | Botão **Como jogar** |
 | Alternar entre desafio diário e treino | Botões **Diário** / **Treino** |
 
-As espécies minerais disponíveis como resposta podem ser utilizadas como palpites. **Biotita** também é aceita como palpite petrográfico, embora seja um nome coletivo: ela não é sorteada como resposta, e sua fotomicrografia é tratada como referência de grupo. As demais referências taxonômicas do catálogo continuam disponíveis apenas para consulta.
+As espécies minerais disponíveis na dificuldade escolhida podem ser utilizadas como palpites. **Biotita** também é aceita como palpite petrográfico, embora seja um nome coletivo: ela não é sorteada como resposta, e sua fotomicrografia é tratada como referência de grupo. As demais referências taxonômicas do catálogo continuam disponíveis apenas para consulta.
 
 ## Progresso e coleção
 
@@ -83,6 +91,7 @@ node tests/photos.test.cjs index.html
 node tests/daily-and-clues.test.cjs index.html
 node tests/three-modes.test.cjs index.html
 node tests/ppl-xpl.test.cjs index.html
+node tests/difficulty.test.cjs index.html
 node tests/visual-theme.test.cjs
 ```
 
