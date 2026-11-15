@@ -756,3 +756,31 @@ body{
     .photo-pair-item .challenge-photo-frame{height:clamp(155px,45vw,255px)}
  .photo-pair-item .challenge-photo{object-fit:contain}
 }
+
+/* Seleção global de dificuldade, configurada antes de iniciar uma partida. */
+.hub-difficulty{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  gap:12px 18px;margin:12px auto 22px;padding:13px 20px;
+  width:max-content;max-width:100%;background:#fff9e9;
+  border:2px solid #235369;border-radius:13px;box-shadow:0 4px 0 #235369;
+}
+.hub-difficulty .difficulty-control{display:flex;align-items:center;gap:11px;color:#174e65;font-weight:950;font-size:12px}
+.hub-difficulty .difficulty-select{
+  min-width:123px;padding:9px 32px 9px 12px;
+  border:2px solid #24566d;border-radius:8px;background:#fffef8;
+  color:#18495f;font:900 13px "Trebuchet MS",Verdana,sans-serif;
+  box-shadow:0 2px 0 #b2cbd0;cursor:pointer;
+}
+.hub-difficulty .difficulty-select:focus-visible{outline:3px solid #f3ba51;outline-offset:2px}
+.hub-difficulty-note{font-size:11px;font-weight:800;color:#53747a}
+.sources .source-links{display:flex;flex-direction:column;align-items:center;gap:7px}
+.sources .source-links span{max-width:900px;line-height:1.6;text-align:center;color:#345a63}
+.sources a{color:#155976;text-decoration:underline;text-underline-offset:2px}
+.sources a:hover{color:#0c3f54}
+@media(max-width:700px){
+  .hub-difficulty{gap:7px 12px;padding:11px 13px;margin:9px auto 19px}
+  .hub-difficulty .difficulty-control{font-size:11px;gap:8px}
+  .hub-difficulty .difficulty-select{min-width:105px;font-size:12px;padding:8px 26px 8px 9px}
+  .hub-difficulty-note{font-size:10px;text-align:center}
+  .sources .source-links{gap:8px}
+}

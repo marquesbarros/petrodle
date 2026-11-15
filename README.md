@@ -33,7 +33,7 @@ No **modo Imagem**, duas fotomicrografias verificadas da espécie são apresenta
 | **Médio** | 45 espécies: as 15 do Fácil e mais 30. |
 | **Difícil** | Todas as espécies jogáveis cadastradas na base, respeitando os requisitos da modalidade. |
 
-No Clássico e na Descrição, o Difícil utiliza todas as espécies disponíveis para esses modos. No modo Imagem, cada mineral ainda precisa de duas fotografias válidas. A escolha fica ao lado dos botões **Diário** e **Treino**. As sugestões de palpites são limitadas à dificuldade escolhida no Fácil e no Médio, e cada combinação possui progresso separado. O modo Difícil mantém a compatibilidade com os palpites e partidas anteriores. A coleção de minerais descobertos continua compartilhada.
+No Clássico e na Descrição, o Difícil utiliza todas as espécies disponíveis para esses modos. No modo Imagem, cada mineral ainda precisa de duas fotografias válidas. A dificuldade é selecionada na **tela inicial**, antes de escolher a modalidade. A seleção também filtra o catálogo: Fácil apresenta 15 espécies, Médio apresenta 45 e Difícil libera todas as fichas, incluindo as referências taxonômicas. As sugestões de palpites são limitadas à dificuldade escolhida no Fácil e no Médio, e cada combinação possui progresso separado. O modo Difícil mantém a compatibilidade com os palpites e partidas anteriores. A coleção de minerais descobertos continua compartilhada.
 
 No **Clássico**, cada palpite produz uma linha na tabela. As indicações significam:
 
@@ -76,9 +76,11 @@ A identificação petrográfica depende de contexto, composição e condições 
 
 ## Fontes e direitos de uso
 
-As fotomicrografias atribuídas a **Heinrich T. Frank, UFRGS (2018)** têm autorização documentada para **uso não comercial**. Outras fotografias mantêm atribuições e licenças próprias. O código público não implica licença livre sobre todo o acervo de imagens.
+A referência principal é **FRANK, H. T. *Guia de Minerais Transparentes ao Microscópio Petrográfico*. Porto Alegre: UFRGS, 2018**, disponível no [MinMicro](https://www.ufrgs.br/minmicro/). As fotomicrografias atribuídas ao autor têm autorização documentada para **uso não comercial**. Outras fotografias mantêm atribuições e licenças próprias. O código público não implica licença livre sobre todo o acervo de imagens.
 
 Para consultar a rastreabilidade e os limites de reutilização, veja [AUDITORIA.md](AUDITORIA.md) e [DIREITOS.md](DIREITOS.md).
+
+O **Petrodle é um jogo de acesso livre e gratuito**. Críticas, correções mineralógicas e sugestões podem ser encaminhadas a [marquesbarros.geo@gmail.com](mailto:marquesbarros.geo@gmail.com). A gratuidade do jogo não altera as condições de reutilização das imagens de terceiros.
 
 ## Executar e testar
 

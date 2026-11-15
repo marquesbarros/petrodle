@@ -27,5 +27,7 @@ jobs:
         run: node tests/ppl-xpl.test.cjs index.html
       - name: Verificar níveis de dificuldade e fotografias
         run: node tests/difficulty.test.cjs index.html
+      - name: Verificar abertura, catálogo filtrado e créditos
+        run: node tests/landing-and-credits.test.cjs index.html
       - name: Verificar identidade visual e integração do jogo
         run: node tests/visual-theme.test.cjs
