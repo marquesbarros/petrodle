@@ -517,14 +517,15 @@ function cleanFamily(m){
 function normalizeCatalogue(raw){
  const original=raw.map(m=>{
    const isSpecies=!NON_SPECIES.has(m.name);
+   const guessable=(isSpecies&&m.name!=='Crisocola')||m.name==='Biotita';
    const kind=isSpecies?'espécie':'referência de grupo, série ou material';
    let verified=isSpecies;
    const pics=m.images.map(im=>({...im,verifiedForSpecies:verified,illustrative:!verified}));
-   return {...m,kind,taxonRank:isSpecies?'species':'reference',playable:isSpecies&&m.name!=='Crisocola',family:cleanFamily(m),
+   return {...m,kind,taxonRank:isSpecies?'species':'reference',playable:isSpecies&&m.name!=='Crisocola',guessable,family:cleanFamily(m),
       images:pics,aliases:(!isSpecies?[]:m.aliases||[]),referenceName:!isSpecies?m.name:null,
       sources:[{label:GUIDE,page:m.sourcePage}].concat(SPECIES_SOURCE[m.name]?[{label:'Mindat · nomenclatura',url:SPECIES_SOURCE[m.name]}]:[]),
       speciesPhotoStatus:verified?'fotomicrografia da ficha':'imagem ilustrativa do grupo; espécie não determinada',
-      reviewNotes:[...(m.reviewNotes||[]),...(!isSpecies?['Verbetes coletivos preservados apenas para consulta; nunca são respostas.']:[])],
+      reviewNotes:[...(m.reviewNotes||[]),...(!isSpecies?[m.name==='Biotita'?'Nome coletivo aceito como palpite petrográfico; não é espécie sorteável.':'Verbetes coletivos preservados apenas para consulta; nunca são respostas.']:[])],
       opticalDataScope:'Ficha do guia; ver limites de identificação petrográfica'};
  });
  const byName=new Map(original.map(m=>[m.name,m]));
@@ -540,7 +541,7 @@ function normalizeCatalogue(raw){
       ppl:opaque?'Mineral opaco à luz transmitida; identificação exige luz refletida, química ou métodos complementares.':p.ppl,
       xpl:opaque?'Opaco sob nicóis cruzados em luz transmitida.':p.xpl,
       colorPPL:opaque?null:p.colorPPL,relief:opaque?null:p.relief,pleochroism:opaque?null:p.pleochroism,birefringence:opaque?null:p.birefringence,
-      kind:'espécie mineral',taxonRank:'species',playable:true,formula,system,family,cations:cations.split(','),
+      kind:'espécie mineral',taxonRank:'species',playable:true,guessable:true,formula,system,family,cations:cations.split(','),
       images:[...(verifiedPhoto?[verifiedPhoto]:[]),...illustrative],aliases:[],parentGroup:parent,referenceName:null,
       sources:[{label:GUIDE,page:p.sourcePage,scope:'atributos ópticos gerais'}, {label:'Mindat · nomenclatura e fórmulas',url:src,scope:'composição/espécies'}],
       speciesPhotoStatus:verifiedPhoto?'foto macroscópica identificada; lâmina do grupo ilustrativa':'somente fotomicrografia ilustrativa do grupo (não identificada como esta espécie)',
@@ -549,7 +550,7 @@ function normalizeCatalogue(raw){
  });
  const compositional=PLAG_RANGES.map(([name,range])=>{
    const p=byName.get('Plagioclásios');
-   return {...p,id:SLUG(name),name,taxonRank:'composition_range',kind:'faixa composicional (não espécie IMA)',playable:false,
+   return {...p,id:SLUG(name),name,taxonRank:'composition_range',kind:'faixa composicional (não espécie IMA)',playable:false,guessable:false,
       formula:`(Na,Ca)(Al,Si)4O8 · ${range}`,family:'Grupo dos feldspatos',parentGroup:'Plagioclásios',aliases:[],
       images:p.images.slice(0,1).map(im=>({...im,verifiedForSpecies:false,illustrative:true,imageType:'Ilustração geral de plagioclásios'})),
       sources:[{label:GUIDE,page:p.sourcePage},{label:'Mindat · faixas de composição',url:'https://www.mindat.org/min-9264.html'}],
@@ -586,17 +587,18 @@ const COLOR_LABELS = {incolor:'Incolor',colorido:'Colorido',variável:'Variável
 function normalizeText(value) {
   return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
 }
+function isGuessable(m) {return Boolean(m&&(m.guessable??m.playable));}
 function searchMinerals(minerals, query, max=8) {
   const q = normalizeText(query);
-  if (!q) return minerals.filter(m=>m.playable).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).slice(0,max);
-  return minerals.filter(m=>m.playable&&[m.name,...m.aliases].some(s=>normalizeText(s).includes(q)))
+  if (!q) return minerals.filter(isGuessable).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).slice(0,max);
+  return minerals.filter(m=>isGuessable(m)&&[m.name,...m.aliases].some(s=>normalizeText(s).includes(q)))
     .sort((a,b)=>Number(normalizeText(b.name).startsWith(q))-Number(normalizeText(a.name).startsWith(q)) || a.name.localeCompare(b.name,'pt-BR'))
     .slice(0,max);
 }
 function resolveGuess(minerals, rawName, previousGuesses=[]) {
  const query=normalizeText(rawName);
  if(!query)return {status:'empty'};
- const direct=minerals.find(m=>m.playable&&(normalizeText(m.name)===query||(m.aliases||[]).some(a=>normalizeText(a)===query)));
+ const direct=minerals.find(m=>isGuessable(m)&&(normalizeText(m.name)===query||(m.aliases||[]).some(a=>normalizeText(a)===query)));
  const found=searchMinerals(minerals,query,2);
  const mineral=direct||(found.length===1?found[0]:null);
  if(!mineral)return {status:'choose'};
@@ -838,7 +840,7 @@ function chooseTraining(gameMode,previous){const options=getEligibleForMode(MINE
 function load(gameMode,playMode){
  const prior=stored(stateKey(gameMode,playMode),{});
  const targetId=playMode==='daily'?getModeDailyId(MINERALS,today,gameMode):(getEligibleForMode(MINERALS,gameMode).some(m=>m.id===prior.targetId)?prior.targetId:chooseTraining(gameMode));
- const guesses=[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>byId.get(id)?.playable))];
+ const guesses=[...new Set((Array.isArray(prior.guesses)?prior.guesses:[]).filter(id=>isGuessable(byId.get(id))))];
  return {gameMode,playMode,targetId,guesses,hintCount:Math.min(6,Math.max(0,Number(prior.hintCount)||0),getAvailableHintCount(guesses.length)),message:''};
 }
 const initialGame=MODES.some(m=>m.id===stored('petrodle:gameMode','classic'))?stored('petrodle:gameMode','classic'):'classic';
@@ -929,7 +931,7 @@ function showCatalog(query=''){
  });
 }
 function catalogDetail(m){
- return `<div class="catalog-detail-header"><div class="eyebrow">GUIA · PÁGINA ${m.sourcePage}</div><h3>${esc(m.name)}</h3><p>${esc(m.kind)} · ${m.playable?'Resposta possível':'Consulta apenas'}</p>${m.parentGroup?`<p class="photo-scope">Grupo de origem: ${esc(m.parentGroup)}. ${esc(m.opticalDataScope)}</p>`:''}</div><div class="chem-profile"><strong>${esc(m.formula||'Fórmula não individualizada')}</strong><span>${esc(m.anionGroup||'Não informada')} · ${esc(m.silicateStructure||'')} · Cátions: ${esc(m.cations.join(', ')||'Não individualizados')}</span><span>Família: ${esc(m.family)} · Sistema: ${esc(m.system)} · PPL: ${esc(displayValue(m,'colorPPL'))}</span></div>${gallery(m)}<div class="catalog-properties"><section><b>PPL</b><p>${esc(m.ppl)}</p></section><section><b>XPL</b><p>${esc(m.xpl)}</p></section><section><b>Clivagem</b><p>${esc(m.cleavageDescription||'Não informada')}</p></section><section><b>Extinção</b><p>${esc(m.extinction||'Não informada')}</p></section><section><b>Maclas</b><p>${esc(m.twinningDescription||'Não informadas')}</p></section><section><b>Associações</b><p>${esc(m.associations||'Não informadas')}</p></section></div><div class="catalog-source-list"><b>Fontes</b>${m.sources.map(v=>`<span>${v.url?`<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.label)}</a>`:esc(v.label)}${v.page?' · p. '+v.page:''}</span>`).join('')}</div><p class="catalog-copyright">${esc(m.opticalDataScope||'')} · ${esc(m.speciesPhotoStatus||'')}.</p>`;
+ return `<div class="catalog-detail-header"><div class="eyebrow">GUIA · PÁGINA ${m.sourcePage}</div><h3>${esc(m.name)}</h3><p>${esc(m.kind)} · ${m.playable?'Resposta possível':isGuessable(m)?'Palpite permitido (não sorteado)':'Consulta apenas'}</p>${m.parentGroup?`<p class="photo-scope">Grupo de origem: ${esc(m.parentGroup)}. ${esc(m.opticalDataScope)}</p>`:''}</div><div class="chem-profile"><strong>${esc(m.formula||'Fórmula não individualizada')}</strong><span>${esc(m.anionGroup||'Não informada')} · ${esc(m.silicateStructure||'')} · Cátions: ${esc(m.cations.join(', ')||'Não individualizados')}</span><span>Família: ${esc(m.family)} · Sistema: ${esc(m.system)} · PPL: ${esc(displayValue(m,'colorPPL'))}</span></div>${gallery(m)}<div class="catalog-properties"><section><b>PPL</b><p>${esc(m.ppl)}</p></section><section><b>XPL</b><p>${esc(m.xpl)}</p></section><section><b>Clivagem</b><p>${esc(m.cleavageDescription||'Não informada')}</p></section><section><b>Extinção</b><p>${esc(m.extinction||'Não informada')}</p></section><section><b>Maclas</b><p>${esc(m.twinningDescription||'Não informadas')}</p></section><section><b>Associações</b><p>${esc(m.associations||'Não informadas')}</p></section></div><div class="catalog-source-list"><b>Fontes</b>${m.sources.map(v=>`<span>${v.url?`<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.label)}</a>`:esc(v.label)}${v.page?' · p. '+v.page:''}</span>`).join('')}</div><p class="catalog-copyright">${esc(m.opticalDataScope||'')} · ${esc(m.speciesPhotoStatus||'')}.</p>`;
 }
 function header(){
  return `<header class="topbar"><div class="topbar-inner"><button class="brand" type="button" data-home aria-label="Página inicial Petrodle"><span class="brand-icon">${logo}</span><span>Petro<em>dle</em></span></button><nav class="header-nav"><button id="catalog-link" class="nav-link">${icon('book',15)} Catálogo</button></nav><button class="help-button" id="help" aria-label="Como jogar">${icon('help',17)} <span>Como jogar</span></button></div></header><main class="page">`;

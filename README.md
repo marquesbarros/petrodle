@@ -47,7 +47,7 @@ Digite um nome no campo de busca. Selecione um resultado e pressione **Tentar** 
 | Ver as instruções dentro do jogo | Botão **Como jogar** |
 | Alternar entre desafio diário e treino | Botões **Diário** / **Treino** |
 
-Os nomes devem corresponder a espécies minerais disponíveis como resposta. O catálogo também contém referências taxonômicas e grupos para consulta, que não são respostas válidas.
+As espécies minerais disponíveis como resposta podem ser utilizadas como palpites. **Biotita** também é aceita como palpite petrográfico, embora seja um nome coletivo: ela não é sorteada como resposta, e sua fotomicrografia é tratada como referência de grupo. As demais referências taxonômicas do catálogo continuam disponíveis apenas para consulta.
 
 ## Progresso e coleção
 

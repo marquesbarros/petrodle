@@ -11,9 +11,9 @@ assert.ok(start !== -1 && end > start, 'Script do jogo não localizado');
 
 const ctx = {};
 vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess};',
+  '\nglobalThis.__test = {MODES, MINERALS, searchMinerals, isGuessable, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess};',
   ctx, {timeout: 30000});
-const {MODES, MINERALS, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess} = ctx.__test;
+const {MODES, MINERALS, searchMinerals, isGuessable, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess} = ctx.__test;
 
 // A busca só registra nomes válidos e palpites inéditos, sem surpresas ao confirmar.
 const sample = [
@@ -34,6 +34,23 @@ assert.equal(resolveGuess(sample, 'feldspato', []).status, 'choose',
 assert.equal(resolveGuess(sample, 'alman', []).id, 'almandina',
   'Correspondência única pode ser confirmada pelo teclado');
 
+
+// Biotita é um nome petrográfico coletivo: palpite válido, não espécie sorteável.
+const biotita = MINERALS.find(m => m.id === 'biotita');
+assert.ok(biotita, 'Biotita deve existir no catálogo');
+assert.equal(biotita.taxonRank, 'reference', 'Biotita não deve ser rotulada como espécie IMA');
+assert.equal(biotita.playable, false, 'Biotita não altera os alvos diários existentes');
+assert.equal(isGuessable(biotita), true, 'Biotita deve ser aceita como palpite');
+assert.ok(searchMinerals(MINERALS, 'biot').some(m => m.id === 'biotita'),
+  'A busca deve sugerir biotita');
+assert.equal(resolveGuess(MINERALS, 'Biotita').id, 'biotita',
+  'O palpite biotita deve ser confirmado');
+assert.equal(resolveGuess(MINERALS, 'Biotita', ['biotita']).status, 'duplicate',
+  'Biotita não deve consumir uma segunda tentativa');
+assert.equal(resolveGuess(MINERALS, 'Granada').status, 'choose',
+  'Outros grupos não devem tornar-se palpites por acidente');
+assert.match(html, /filter\(id=>isGuessable\(byId\.get\(id\)\)\)/,
+  'Palpites de biotita devem ser recuperados após recarregar a página');
 
 assert.deepEqual(Array.from(MODES, m => m.id), ['classic', 'photo', 'description'],
   'Clássico e Descrição devem ser preservados; Silhueta e Pixel dão lugar a Imagem');
