@@ -19,8 +19,10 @@ Cada modalidade tem um desafio diário próprio. Se quiser continuar jogando, se
 | Modo | Objetivo | Tentativas |
 |---|---|---|
 | **Clássico** | Descobrir o mineral comparando 11 atributos químicos, cristalográficos e ópticos. | Ilimitadas |
-| **Imagem** | Identificar o mineral em uma fotomicrografia apresentada sem filtros. | Até 8 |
+| **Imagem** | Identificar o mineral comparando duas fotomicrografias, PPL e XPL. | Até 8 |
 | **Descrição** | Identificar o mineral a partir da pista inicial e das pistas opcionais. | Até 8 |
+
+No **modo Imagem**, o jogador vê duas fotomicrografias lado a lado: **PPL** (luz polarizada plana, nicóis descruzados) e **XPL** (polarizadores cruzados, nicóis cruzados). Os pares foram selecionados a partir das fotografias existentes do Guia Frank, respeitando a identificação de cada condição de iluminação. O sorteio dessa modalidade utiliza somente minerais com ambas as imagens verificadas. Fotos avulsas ou sequências apenas em PPL continuam no catálogo, mas não são rotuladas incorretamente como pares nem sorteadas nessa modalidade. A disponibilidade de pares não altera o conjunto de respostas dos modos Clássico e Descrição.
 
 No **Clássico**, cada palpite produz uma linha na tabela. As indicações significam:
 
@@ -77,6 +79,7 @@ Os testes usam **Node.js**, sem instalar dependências do projeto:
 node tests/photos.test.cjs index.html
 node tests/daily-and-clues.test.cjs index.html
 node tests/three-modes.test.cjs index.html
+node tests/ppl-xpl.test.cjs index.html
 node tests/visual-theme.test.cjs
 ```
 
