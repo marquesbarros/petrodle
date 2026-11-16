@@ -4,6 +4,8 @@
 
 **[Jogar Petrodle](https://marquesbarros.github.io/petrodle/)**
 
+**Documentação do projeto:** [Infraestrutura e arquitetura](docs/ARQUITETURA.md) · [Referências bibliográficas](docs/REFERENCIAS.md) · [Linhagem de versões, autoria e assistentes de código](docs/HISTORICO_E_DESENVOLVIMENTO.md).
+
 ## Como jogar
 
 1. **Escolha um modo:** Clássico, Imagem ou Descrição.
@@ -99,3 +101,12 @@ node tests/visual-theme.test.cjs
 ```
 
 O GitHub Actions executa essas verificações a cada alteração na branch principal. A publicação é realizada no **GitHub Pages** a partir de `main`, diretório `/(root)`.
+
+
+## Autoria, versões e transparência técnica
+
+**Autor e mantenedor:** Lucas Marques Barros. A infraestrutura publicada usa **HTML, CSS e JavaScript no navegador**, GitHub Pages e uma suíte de testes **Node.js 22 / GitHub Actions**. Não há backend nem etapa de compilação obrigatória no repositório. Veja a [arquitetura detalhada](docs/ARQUITETURA.md).
+
+As fontes mineralógicas e fotográficas, incluindo **Frank (2018)** e os registros do Wikimedia Commons, estão identificadas em [referências](docs/REFERENCIAS.md), [auditoria](AUDITORIA.md) e [direitos de imagem](DIREITOS.md). **O uso não comercial das fotomicrografias do guia Frank não autoriza redistribuição irrestrita.**
+
+A [linhagem documental](docs/HISTORICO_E_DESENVOLVIMENTO.md) identifica a **auditoria v0.8** como marco documentado, sem presumir uma tag de lançamento para o estado atual. O desenvolvimento contou com **assistência de programação via Codex (OpenAI)**, segundo o mantenedor. As **versões históricas exatas dos modelos de Codex não foram comprovadas** no repositório; a revisão desta documentação teve apoio do **ChatGPT GPT-6 (16/11/2026)**. Os commits Git são a referência para versões reproduzíveis.
