@@ -1,72 +1,64 @@
 # Petrodle
 
-Jogo de identificação mineralógica para **revisar e fixar conhecimentos sobre minerais**, suas propriedades e seus contextos geológicos. A identificação é feita por comparação de atributos, fotomicrografias ou descrições ópticas.
+Jogo de identificação mineralógica desenvolvido para **revisar e fixar conhecimentos sobre minerais, suas propriedades e seus contextos geológicos**. O aprendizado ocorre por comparação de atributos, análise de fotomicrografias e interpretação de descrições ópticas.
 
-**[Jogar Petrodle](https://marquesbarros.github.io/petrodle/)**
+**[Jogar](https://marquesbarros.github.io/petrodle/)** · **[Arquitetura](docs/ARQUITETURA.md)** · **[Referências](docs/REFERENCIAS.md)**
 
-## Como jogar
+## O que foi desenvolvido
 
-1. Selecione a dificuldade: **Fácil** (15 minerais), **Médio** (45) ou **Difícil** (todas as espécies elegíveis).
-2. Escolha o modo de jogo.
-3. Digite o nome de um mineral e confirme o palpite.
-4. Use as pistas e comparações para chegar à resposta.
-5. Ao terminar, consulte a ficha mineralógica.
+- **Três modos de identificação:** Clássico, Imagem e Descrição.
+- **152 espécies** no catálogo de referência.
+- **Três dificuldades:** Fácil (15 minerais), Médio (45) e Difícil (espécies elegíveis da base).
+- **Desafios diários e partidas de treino**, com progresso independente por modalidade e dificuldade.
+- **Fichas mineralógicas, coleção de descobertas e compartilhamento de resultados.**
+- **Rastreabilidade das imagens:** 145 espécies com fotomicrografias nominais registradas e 7 com imagens ilustrativas de grupo.
 
-Há desafios **diários** para cada combinação de modo e dificuldade. O modo **Treino** permite jogar outras partidas.
-
-## Modos
-
-| Modo | Como funciona | Tentativas |
+| Modo | Mecânica | Tentativas |
 | --- | --- | --- |
-| **Clássico** | Compara 11 propriedades químicas, cristalográficas e ópticas a cada palpite. | Ilimitadas |
-| **Imagem** | Apresenta duas fotomicrografias da espécie. | Até 8 |
-| **Descrição** | Apresenta uma pista inicial e outras pistas opcionais. | Até 8 |
+| Clássico | Comparação de 11 propriedades químicas, cristalográficas e ópticas | Ilimitadas |
+| Imagem | Identificação a partir de duas fotomicrografias | Até 8 |
+| Descrição | Identificação por pistas textuais | Até 8 |
 
-No modo Clássico, verde indica correspondência, amarelo indica correspondência parcial, vermelho indica diferença e cinza indica falta de dados. As setas ↑ e ↓ orientam a comparação de valores ordenáveis. Uma dica opcional é oferecida a cada três palpites.
+No modo Imagem, são exigidas duas fotografias nominais da espécie. Pares PPL/XPL conferidos têm prioridade; imagens de grupo não são usadas como respostas.
 
-No modo Imagem, são usadas apenas espécies com duas fotomicrografias nominais verificadas. Pares PPL/XPL conferidos têm prioridade, mas nem todas as imagens formam um par óptico. Por isso, as fotografias não recebem rótulos PPL/XPL automaticamente.
+## Implementação
 
-## Catálogo
-
-A base reúne **152 espécies**, com informações sobre propriedades mineralógicas e imagens de referência. Dessas, **145** têm fotomicrografias nominais registradas e **7** utilizam imagens ilustrativas de grupo. Estas últimas não são sorteadas como resposta no modo Imagem.
-
-O nome coletivo **biotita** pode ser usado como palpite, mas não é sorteado como espécie-resposta.
-
-A identificação mineralógica depende do contexto petrográfico. As fichas são material de estudo, não substituem análises laboratoriais.
-
-## Recursos
-
-- Catálogo consultável conforme a dificuldade selecionada.
-- Busca por nome, seleção por teclado e dicas opcionais.
-- Coleção de espécies descobertas.
-- Compartilhamento de resultados sem revelar a resposta.
-- Progresso salvo no navegador, sem conta ou sincronização entre dispositivos.
-
-## Infraestrutura
-
-| Componente | Implementação |
+| Área | Solução |
 | --- | --- |
-| Aplicação | HTML, CSS e JavaScript; execução no navegador |
-| Interface e lógica | `index.html` e `game.css` |
-| Hospedagem | GitHub Pages, branch `main` |
-| Dados locais | Armazenamento do navegador |
+| Aplicação | HTML, CSS e JavaScript |
+| Lógica e catálogo | `index.html` |
+| Estilos | `game.css` |
+| Persistência | Armazenamento local do navegador |
+| Hospedagem | GitHub Pages |
 | Testes | Node.js 22 e GitHub Actions |
-| Servidor | Não há backend no repositório publicado |
+| Servidor | Sem backend e sem autenticação |
 
-Para executar localmente, abra `index.html`. Para verificar os testes, use os comandos descritos em [Arquitetura](docs/ARQUITETURA.md).
+O jogo funciona diretamente no navegador, sem instalação, conta ou serviços de armazenamento remoto para salvar partidas. A estrutura reúne interface e lógica no cliente. O projeto não exige etapa de compilação.
 
-## Referências e direitos de uso
+## Verificação
 
-O conteúdo mineralógico parte do *Guia de Minerais Transparentes ao Microscópio Petrográfico*, de **Heinrich T. Frank (UFRGS, 2018)**. O acervo de imagens também inclui registros do Wikimedia Commons.
+Os testes automatizados verificam regras de identificação, seleção por dificuldade, desafios diários, pistas, fotografias, estados do jogo e elementos da interface.
 
-As fotomicrografias do guia Frank têm autorização de **uso não comercial**. Para atribuições e condições de reutilização, consulte [Referências](docs/REFERENCIAS.md), [Auditoria de imagens](AUDITORIA.md) e [Direitos de imagem](DIREITOS.md).
+O workflow [`tests.yml`](.github/workflows/tests.yml) executa a suíte na branch `main` e nas solicitações de alteração. Os comandos individuais estão em [Arquitetura](docs/ARQUITETURA.md).
 
-## Versões e desenvolvimento
+Para executar o jogo localmente, abra `index.html` em um navegador ou utilize um servidor estático.
 
-O documento de auditoria registra o marco **v0.8**. Para identificar o estado exato do código, use o histórico de commits.
+## Conteúdo e referências
 
-O desenvolvimento contou com apoio do **Codex (OpenAI)**. As versões dos modelos usados nas sessões anteriores não estão documentadas. A revisão documental de 16/11/2026 utilizou **ChatGPT (GPT-6)**.
+A principal fonte mineralógica é **Frank (2018), *Guia de Minerais Transparentes ao Microscópio Petrográfico* (UFRGS)**. Outras imagens têm origem no Wikimedia Commons.
 
-**Documentação:** [Arquitetura](docs/ARQUITETURA.md) · [Bibliografia](docs/REFERENCIAS.md) · [Histórico e assistentes de código](docs/HISTORICO_E_DESENVOLVIMENTO.md).
+Os dados foram organizados para estudo. A identificação depende do contexto petrográfico e pode exigir análises complementares.
 
-Para correções ou sugestões: [marquesbarros.geo@gmail.com](mailto:marquesbarros.geo@gmail.com).
+As fotografias do guia Frank têm autorização de **uso não comercial**. A autoria, as licenças e as pendências das imagens estão registradas em [Referências](docs/REFERENCIAS.md), [Auditoria](AUDITORIA.md) e [Direitos](DIREITOS.md).
+
+## Estado do projeto
+
+O [registro fotográfico v0.8](AUDITORIA.md) é um marco documentado. O estado exato do código é identificado pelo [histórico de commits](https://github.com/marquesbarros/petrodle/commits/main).
+
+A estrutura atual concentra boa parte da lógica e dos dados em um único HTML. O repositório não contém um arquivo `LICENSE` para o software.
+
+O desenvolvimento teve apoio do **Codex (OpenAI)**; as versões dos modelos das sessões anteriores não estão registradas. A documentação foi revisada com **ChatGPT GPT-6** em 16/11/2026.
+
+[Histórico e desenvolvimento assistido](docs/HISTORICO_E_DESENVOLVIMENTO.md) · [Documentação técnica](docs/ARQUITETURA.md)
+
+Contato para sugestões e correções: [marquesbarros.geo@gmail.com](mailto:marquesbarros.geo@gmail.com).
