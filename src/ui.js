@@ -304,6 +304,12 @@ function resultBanner(){
    ${result.won?profile(target,true):''}
  </section>`;
 }
+function celebrateWin(){
+ root.querySelector('.result')?.insertAdjacentHTML('afterbegin',`
+   <div class="result-fireworks" aria-hidden="true">
+     <span></span><span></span><span></span>
+   </div>`);
+}
 function dialogs(){
  return `<dialog class="dialog" id="help-dialog" aria-labelledby="help-title">
    <div class="dialog-top"><h2 id="help-title">Como jogar</h2><button type="button" id="close-help" class="dialog-close" aria-label="Fechar ajuda">×</button></div>
@@ -401,6 +407,7 @@ function guess(selectedId){
  state.message=resultState.ended?'':state.gameMode==='classic'?`${m.name} adicionado à comparação.`:`Não é ${m.name}.`;
  persist();
  render(resultState.ended?'#result-title':'#guess-input');
+ if(resultState.won)celebrateWin();
 }
 function changeGame(mode){
  if(!MODES.some(m=>m.id===mode))return;

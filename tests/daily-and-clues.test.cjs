@@ -32,6 +32,6 @@ assert.ok(buildProgressiveClues(corindon)[0].value.startsWith('[mineral]'), 'Cor
 assert.ok(buildProgressiveClues(espodumenio)[0].value.includes('[mineral]'), 'Erro de transcrição de espodumênio deve ser ocultado');
 assert.ok(html.includes('data-retry-photo'), 'Falha na foto precisa de ação de recuperação');
 assert.match(html,/if\(m\.id===state\.targetId\)discover\(m\.id\)/, 'Acerto deve registrar o mineral na coleção');
-assert.doesNotMatch(html,/function celebrateWin|function startReveal/, 'Resultado e tabela devem aparecer sem espera');
+assert.doesNotMatch(html,/function startReveal/, 'Resultado e tabela devem aparecer sem espera');
 assert.ok(html.includes("${catalogDetail(m,'result')}</section>"), 'Ficha final deve reutilizar a ficha completa do catálogo');
 console.log('OK: pistas sem vazamentos, recuperação da foto, coleção e ficha completa');

@@ -228,6 +228,9 @@ async function verifyClipboard(page, mode, answer) {
   await enterGuess(page, answer);
   await page.locator('#result-title').filter({ hasText: answer }).waitFor();
   await page.locator('.result #answer-profile').getByRole('heading', { name: answer }).waitFor();
+  const fireworks = page.locator('.result-fireworks');
+  assert.equal(await fireworks.count(), 1);
+  assert.equal(await fireworks.isVisible(), false, 'Movimento reduzido oculta os fogos');
   assert.equal(await page.locator('#review-answer').count(), 0);
   await page.locator('#share').click();
   await page.getByText(/Resultado copiado/).waitFor();
@@ -456,6 +459,7 @@ async function verify(browser, url) {
     await page.clock.setFixedTime(new Date('2026-11-17T02:55:00Z'));
     await page.evaluate(() => window.dispatchEvent(new Event('focus')));
     await page.locator('#result-title').filter({ hasText: 'Epidoto' }).waitFor();
+    assert.equal(await page.locator('.result-fireworks').count(), 0, 'A vitória salva não repete os fogos');
     assert.deepEqual(errors, [], 'Erros de execução no navegador');
     return { a11y, keyboard: { activeOptionIsLinked, activeOptionCleared, focusAfterGuess, helpNamed, catalogSearchNamed } };
   } catch (error) {
@@ -530,6 +534,7 @@ async function verifyOutcomesAndTraining(browser, url) {
       const input = page.locator('#guess-input');
       assert.ok(!await input.count() || !await input.isEnabled(), 'A derrota encerra os palpites');
       assert.equal(await page.locator('.result #answer-profile').count(), 0);
+      assert.equal(await page.locator('.result-fireworks').count(), 0, 'Derrotas não exibem fogos');
       await page.locator('#review-answer').click();
       assert.ok(await page.locator('#answer-profile').evaluate(profile => profile === document.activeElement));
       await page.locator('.back-home').click();
@@ -542,6 +547,7 @@ async function verifyOutcomesAndTraining(browser, url) {
     for (const mode of ['classic', 'photo', 'description']) {
       await openMode(page, mode);
       assert.equal(await training.getAttribute('aria-pressed'), 'true');
+      await page.emulateMedia({ reducedMotion: mode === 'classic' ? 'no-preference' : 'reduce' });
       await enterGuess(page, 'Calcita');
       await page.locator('#result-title').filter({ hasText: 'Calcita' }).waitFor();
       await page.locator('.result #answer-profile').waitFor();
@@ -549,6 +555,16 @@ async function verifyOutcomesAndTraining(browser, url) {
       assert.equal(await page.locator('#next, #next-result').count(), 1,
         'Treino encerrado oferece uma única ação de novo mineral');
       if (mode === 'classic') {
+        const fireworks = page.locator('.result > .result-fireworks');
+        assert.equal(await fireworks.getAttribute('aria-hidden'), 'true');
+        assert.equal(await fireworks.evaluate(layer => getComputedStyle(layer).pointerEvents), 'none');
+        const bursts = await fireworks.evaluate(layer => layer.getAnimations({ subtree: true }).map(animation => {
+          const { duration, iterations } = animation.effect.getTiming();
+          return [animation.animationName, duration, iterations];
+        }));
+        assert.deepEqual(bursts, Array.from({ length: 3 }, () => ['result-burst', 1250, 2]));
+        assert.equal(await page.locator('.guess-board tbody tr').isVisible(), true,
+          'A tabela aparece enquanto os fogos estão na tela');
         const gap = await page.locator('.result').evaluate(result =>
           result.getBoundingClientRect().top - result.previousElementSibling.getBoundingClientRect().bottom,
         );
