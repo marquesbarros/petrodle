@@ -466,6 +466,39 @@ async function verify(browser, url) {
   }
 }
 
+async function assertFullWidthPhotoPair(page) {
+  const gallery = page.locator('.result #answer-profile .photo-gallery');
+  const photos = gallery.locator('figure > img');
+  assert.equal(await photos.count(), 2);
+  await gallery.scrollIntoViewIfNeeded();
+  await photos.evaluateAll(images => Promise.all(images.map(image => image.decode())));
+  const originalViewport = page.viewportSize();
+  for (const width of [originalViewport.width, 360]) {
+    await page.setViewportSize({ width, height: originalViewport.height });
+    const layout = await gallery.evaluate(node => {
+      const { left, right, width } = node.getBoundingClientRect();
+      const profile = node.parentElement;
+      const style = getComputedStyle(profile);
+      const availableWidth = profile.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const [first, second] = [...node.querySelectorAll('img')].map(image => {
+        const { left, right, top, width, height } = image.getBoundingClientRect();
+        return { left, right, top, height, proportionalWidth: height * image.naturalWidth / image.naturalHeight, width };
+      });
+      return { left, right, width, availableWidth, first, second };
+    });
+    const { left, right, first, second } = layout;
+    assert.ok(Math.abs(first.height - second.height) < 1 && Math.abs(first.top - second.top) < 1,
+      `Fotos lado a lado e com a mesma altura em ${width} px`);
+    assert.ok(Math.abs(left - first.left) < 1 && Math.abs(right - second.right) < 1,
+      `O par ocupa a largura da galeria em ${width} px`);
+    assert.ok(Math.abs(layout.width - layout.availableWidth) < 1 && first.right < second.left,
+      `A galeria ocupa a largura disponível e há espaço entre as fotos em ${width} px`);
+    for (const photo of [first, second]) assert.ok(Math.abs(photo.width - photo.proportionalWidth) < 1,
+      `Fotos mantêm suas proporções em ${width} px`);
+  }
+  await page.setViewportSize(originalViewport);
+}
+
 async function verifyOutcomesAndTraining(browser, url) {
   const context = await browser.newContext({
     locale: 'pt-BR', timezoneId: 'America/Sao_Paulo', reducedMotion: 'reduce',
@@ -520,6 +553,7 @@ async function verifyOutcomesAndTraining(browser, url) {
           result.getBoundingClientRect().top - result.previousElementSibling.getBoundingClientRect().bottom,
         );
         assert.ok(gap >= 16, 'O aviso verde tem respiro abaixo do cabeçalho');
+        await assertFullWidthPhotoPair(page);
         await screenshot(page, 'atual-ficha-no-aviso-verde', true);
         await page.locator('#share').click();
         const share = page.locator('#share-dialog');

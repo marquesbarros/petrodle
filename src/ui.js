@@ -498,6 +498,7 @@ function bind(){
  for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
  bindThumbnails(root);
  bindExternalImages();
+ bindResultPhotoPair();
  document.querySelectorAll('[data-photo-preview]').forEach(button=>button.addEventListener('click',()=>previewPhoto(button)));
  document.getElementById('next')?.addEventListener('click',nextTraining);
  document.getElementById('share')?.addEventListener('click',share);
@@ -538,6 +539,23 @@ function bind(){
    persist();
    render('.hints-revealed .hint-entry:last-child');
  });
+}
+function bindResultPhotoPair(){
+ const gallery=root.querySelector('.result-profile-embedded .photo-gallery');
+ if(!gallery)return;
+ const images=[...gallery.querySelectorAll('figure > img')];
+ if(images.length!==2)return;
+ gallery.classList.add('result-photo-pair');
+ const sizePair=()=>{
+   const ratios=images.map(image=>image.naturalWidth/image.naturalHeight||1);
+   // At least one flex-grow value must reach 1 to fill the row, even with two portrait photos.
+   const widest=Math.max(...ratios);
+   images.forEach((image,index)=>{
+     image.parentElement.style.setProperty('--photo-ratio',ratios[index]/widest);
+   });
+ };
+ for(const image of images)image.addEventListener('load',sizePair,{once:true});
+ sizePair();
 }
 function bindExternalImages(scope=document){
  for(const image of scope.querySelectorAll('img[data-image-fallback]')){
