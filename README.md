@@ -1,17 +1,17 @@
 # Petrodle
 
-Jogo de identificação mineralógica desenvolvido para **revisar e fixar conhecimentos sobre minerais, suas propriedades e seus contextos geológicos**. O aprendizado ocorre por comparação de atributos, análise de fotomicrografias e interpretação de descrições ópticas.
+Jogo de identificação mineralógica desenvolvido para **revisar conhecimentos sobre minerais, suas propriedades e seus contextos geológicos**. As atividades propõem comparação de atributos, observação de fotomicrografias e interpretação de descrições ópticas.
 
-**[Jogar](https://marquesbarros.github.io/petrodle/)** · **[Arquitetura](docs/ARQUITETURA.md)** · **[Referências](docs/REFERENCIAS.md)**
+**[Jogar](https://marquesbarros.github.io/petrodle/)** · **[Uso em aula](docs/USO_EM_AULA.md)** · **[Arquitetura](docs/ARQUITETURA.md)** · **[Referências](docs/REFERENCIAS.md)**
 
 ## O que foi desenvolvido
 
 - **Três modos de identificação:** Clássico, Imagem e Descrição.
-- **152 espécies** no catálogo de referência.
-- **Três dificuldades:** Fácil (15 minerais), Médio (45) e Difícil (espécies elegíveis da base).
+- **152 alvos jogáveis**, além dos verbetes de consulta.
+- **Três dificuldades.** Fácil com 15 alvos centrados em formadores de rocha, Médio com 45 e Difícil com todo o catálogo jogável. [Critérios e listas](docs/DIFICULDADES.md)
 - **Desafios diários e partidas de treino**, com progresso independente por modalidade e dificuldade.
 - **Fichas mineralógicas, coleção de descobertas e compartilhamento de resultados.**
-- **Rastreabilidade das imagens:** 145 espécies com fotomicrografias nominais registradas e 7 com imagens ilustrativas de grupo.
+- **Rastreabilidade das imagens.** Há registro fotográfico nominal para 145 espécies, incluindo fotomicrografias e fotografias de amostras macroscópicas. Outras 7 têm imagens ilustrativas de grupo.
 
 | Modo | Mecânica | Tentativas |
 | --- | --- | --- |
@@ -19,27 +19,35 @@ Jogo de identificação mineralógica desenvolvido para **revisar e fixar conhec
 | Imagem | Identificação a partir de duas fotomicrografias | Até 8 |
 | Descrição | Identificação por pistas textuais | Até 8 |
 
-No modo Imagem, são exigidas duas fotografias nominais da espécie. Pares PPL/XPL conferidos têm prioridade; imagens de grupo não são usadas como respostas.
+O modo Imagem exige duas fotomicrografias nominais distintas e prioriza as combinações PPL/XPL registradas. A interface informa a iluminação quando conhecida. As duas imagens podem mostrar campos diferentes.
+
+| Dificuldade | Clássico | Imagem | Descrição |
+| --- | ---: | ---: | ---: |
+| Fácil | 15 | 12 | 13 |
+| Médio | 45 | 34 | 40 |
+| Difícil | 152 | 84 | 139 |
 
 ## Implementação
 
 | Área | Solução |
 | --- | --- |
 | Aplicação | HTML, CSS e JavaScript |
-| Lógica e catálogo | `index.html` |
+| Lógica, interface e persistência | `src/` |
+| Catálogo e calendário | `data/catalog.js` e `data/daily-versions.js` |
+| Fotomicrografias locais | `assets/minerals/` |
 | Estilos | `game.css` |
 | Persistência | Armazenamento local do navegador |
 | Hospedagem | GitHub Pages |
 | Testes | Node.js 22 e GitHub Actions |
 | Servidor | Sem backend e sem autenticação |
 
-O jogo funciona diretamente no navegador, sem instalação, conta ou serviços de armazenamento remoto para salvar partidas. A estrutura reúne interface e lógica no cliente. O projeto não exige etapa de compilação.
+O jogo funciona diretamente no navegador, sem instalação, conta ou serviços de armazenamento remoto para salvar partidas. A publicação estática dispensa compilação.
 
 ## Verificação
 
 Os testes automatizados verificam regras de identificação, seleção por dificuldade, desafios diários, pistas, fotografias, estados do jogo e elementos da interface.
 
-O workflow [`tests.yml`](.github/workflows/tests.yml) executa a suíte na branch `main` e nas solicitações de alteração. Os comandos individuais estão em [Arquitetura](docs/ARQUITETURA.md).
+O workflow [`tests.yml`](.github/workflows/tests.yml) roda a suíte com `node --test` e confere os inventários gerados. Os comandos de auditoria, manutenção e teste em navegador estão em [Arquitetura](docs/ARQUITETURA.md).
 
 Para executar o jogo localmente, abra `index.html` em um navegador ou utilize um servidor estático.
 
@@ -55,7 +63,7 @@ As fotografias do guia Frank têm autorização de **uso não comercial**. A aut
 
 O [registro fotográfico v0.8](AUDITORIA.md) é um marco documentado. O estado exato do código é identificado pelo [histórico de commits](https://github.com/marquesbarros/petrodle/commits/main).
 
-A estrutura atual concentra boa parte da lógica e dos dados em um único HTML. O repositório não contém um arquivo `LICENSE` para o software.
+O [acervo por imagem](data/acervo.csv) e a [auditoria do catálogo](docs/AUDITORIA_DO_CATALOGO.md) são gerados a partir do catálogo em uso. A licença do software segue em aberto.
 
 O desenvolvimento teve apoio do **Codex (OpenAI)**; as versões dos modelos das sessões anteriores não estão registradas. A documentação foi revisada com **ChatGPT GPT-6** em 16/11/2026.
 

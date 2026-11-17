@@ -1,18 +1,10 @@
-const fs = require('node:fs');
-const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
-const html = fs.readFileSync(file, 'utf8');
-const start = html.indexOf("'use strict'", html.indexOf('<script'));
-const end = html.indexOf('const root =', start);
-assert.ok(start >= 0 && end > start, 'Lógica da partida não localizada');
-const ctx = {};
-vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MINERALS,DIFFICULTIES,getDifficultyMinerals,getDifficultyGuesses,getEligibleForMode,getPhotoImages,getModeDailyId,getDailyId,getDailyModeSummary,MODES};',
-  ctx, {timeout:30000});
-const {MINERALS,DIFFICULTIES,getDifficultyMinerals,getDifficultyGuesses,getEligibleForMode,getPhotoImages,getModeDailyId,getDailyId,getDailyModeSummary,MODES}=ctx.__test;
+const { readGame, getGame } = require('../scripts/load-game.cjs');
+const { html } = readGame(file);
+const { MINERALS, DIFFICULTIES, getDifficultyMinerals, getDifficultyGuesses, getEligibleForMode, getPhotoImages, getModeDailyId, getDailyId, getDailyModeSummary, MODES } = getGame(["MINERALS","DIFFICULTIES","getDifficultyMinerals","getDifficultyGuesses","getEligibleForMode","getPhotoImages","getModeDailyId","getDailyId","getDailyModeSummary","MODES"], file);
 const ids = arr => new Set(arr.map(m => m.id));
 const easy=getDifficultyMinerals(MINERALS,'easy');
 const medium=getDifficultyMinerals(MINERALS,'medium');
@@ -21,6 +13,15 @@ assert.deepEqual(Array.from(DIFFICULTIES,d=>d.id),['easy','medium','hard']);
 assert.equal(easy.length,15,'Fácil deve ter exatamente 15 espécies');
 assert.equal(medium.length,45,'Médio deve ter exatamente 45 espécies');
 assert.equal(hard.length,MINERALS.filter(m=>m.playable).length,'Difícil deve incluir todas as espécies jogáveis cadastradas');
+for (const id of ['albita', 'gipso', 'diopsidio', 'forsterita', 'dolomita', 'magnetita']) {
+  assert.ok(ids(easy).has(id), id + ' integra a seleção introdutória');
+}
+for (const id of ['anortita', 'magnesio-hornblenda', 'zircao', 'titanita', 'caulinita', 'pirita', 'sillimanita', 'almandina', 'barita']) {
+  assert.ok(ids(medium).has(id) && !ids(easy).has(id), id + ' entra na ampliação do Médio');
+}
+for (const id of ['grossularia', 'fluorita', 'corindon', 'berilo', 'topazio']) {
+  assert.ok(ids(hard).has(id) && !ids(medium).has(id), id + ' permanece no catálogo ampliado');
+}
 for(const m of easy)assert.ok(ids(medium).has(m.id),'Médio contém Fácil: '+m.name);
 for(const m of medium)assert.ok(ids(hard).has(m.id),'Difícil contém Médio: '+m.name);
 for(const level of ['easy','medium','hard']){
@@ -31,13 +32,15 @@ for(const level of ['easy','medium','hard']){
   assert.ok(descriptions.every(m=>m.ppl && m.xpl),'Descrição necessita de dados ópticos');
   assert.ok(classic.length>=photos.length,'Imagem não excede a base por dificuldade');
 }
-assert.equal(getEligibleForMode(MINERALS,'photo','easy').length,15,'Os 15 iniciais devem ter duas fotos');
-assert.equal(getEligibleForMode(MINERALS,'photo','medium').length,45,'Os 45 intermediários devem ter duas fotos');
+assert.equal(getEligibleForMode(MINERALS,'photo','easy').length,12,'O Fácil usa os 12 alvos com duas fotos nominais');
+assert.equal(getEligibleForMode(MINERALS,'photo','medium').length,34,'O Médio usa os 34 alvos com duas fotos nominais');
+assert.equal(getEligibleForMode(MINERALS,'description','easy').length,13,'O Fácil usa os alvos com descrição óptica');
+assert.equal(getEligibleForMode(MINERALS,'description','medium').length,40,'O Médio usa os alvos com descrição óptica');
 assert.ok(getEligibleForMode(MINERALS,'photo','hard').length>58,'Fotos sem pares ND/NC aumentam o número de respostas');
 assert.ok(getEligibleForMode(MINERALS,'photo','hard').some(m=>m.id==='actinolita'));
 assert.ok(getDifficultyGuesses(MINERALS,'classic','hard').some(m=>m.id==='biotita'),'Biotita mantém o palpite legado');
 assert.ok(!getDifficultyGuesses(MINERALS,'classic','easy').some(m=>m.id==='biotita'),'O Fácil não exibe referências fora da sua lista');
-assert.equal(getDifficultyGuesses(MINERALS,'photo','easy').length,15);
+assert.equal(getDifficultyGuesses(MINERALS,'photo','easy').length,12);
 
 const image=(src,verifiedForSpecies=true)=>({src,verifiedForSpecies});
 assert.equal(getPhotoImages({id:'teste',images:[image('data:image/png;base64,A')]}),null,'Uma imagem não basta');
@@ -66,7 +69,7 @@ assert.match(html,/id="difficulty"/,'Seletor deve existir junto aos modos de par
 assert.match(html,/data-run-mode="daily"/,'O modo Diário deve permanecer');
 assert.match(html,/data-run-mode="training"/,'O modo Treino deve permanecer');
 assert.match(html,/petrodle:difficulty/,'Dificuldade persistida');
-assert.ok(html.includes("legacy+':'+difficulty"),'Chaves separadas entre níveis para não misturar progresso');
+assert.ok(html.includes("legacy + ':' + difficulty"),'Chaves separadas entre níveis para não misturar progresso');
 const stage=html.slice(html.indexOf('function challengeImage()'),html.indexOf('function challengeClues()'));
-assert.doesNotMatch(stage,/photo-pair-label|pair\.ppl|pair\.xpl/,'As imagens não devem receber rótulos PPL/XPL');
+assert.match(stage,/photoLighting/,'A tela deve indicar a iluminação quando documentada');
 console.log('OK: dificuldades 15 / 45 / base inteira, fotos sem par, progresso e desafios independentes');

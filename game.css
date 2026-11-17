@@ -556,7 +556,7 @@ body{
 .guess-board td.cell.correct{background:#319b68;border-color:#226b50}
 .guess-board td.cell.partial{background:#ffc45e;border-color:#b17b36}
 .guess-board td.cell.absent{background:#d36d75;border-color:#9b4b56}
-.guess-board td.cell.unknown{background:#9cb0ab;border:3px dashed #697f7f}
+.guess-board td.cell.unknown{background:#9cb0ab;color:#203b35;border:3px dashed #697f7f}
 .guess-board td.name-col{
   background:#e9f0e3;border:3px solid #4a7c80;border-radius:9px;
   box-shadow:0 4px 0 #4a7c80!important;
@@ -777,10 +777,143 @@ body{
 .sources .source-links span{max-width:900px;line-height:1.6;text-align:center;color:#345a63}
 .sources a{color:#155976;text-decoration:underline;text-underline-offset:2px}
 .sources a:hover{color:#0c3f54}
+
+/* Legibilidade dos estados do jogo e dos créditos sobre as superfícies claras. */
+.board-intro .board-description,
+.board-footer .small-note{color:#435e53!important}
+.board-description::after,
+.mineral-index,
+.hints-heading small,
+.hints-footer span,
+.board-empty > p,
+.attempt-empty,
+.result-head p,
+.result .result-evidence,
+.catalog-detail-header > p:not(.photo-scope),
+.photo-gallery figcaption,
+.photo-gallery figcaption small,
+.catalog-copyright,
+.stage-footnote,
+.attempt-item > span:nth-child(4),
+.suggestion-copy small{color:#435e53}
+.catalog-detail-header > .eyebrow,
+.catalog-properties section > b,
+.image-stage-caption{color:#236352}
+.photo-pair-item > figcaption{
+  margin-top:6px;color:#23495c;text-align:center;font-size:13px;font-weight:750;
+}
+.guess-board td.cell.correct{background:#226b50}
+.guess-board td.cell.absent{background:#97454f}
+.toast{background:#183e51}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
 @media(max-width:700px){
   .hub-difficulty{gap:7px 12px;padding:11px 13px;margin:9px auto 19px}
   .hub-difficulty .difficulty-control{font-size:11px;gap:8px}
   .hub-difficulty .difficulty-select{min-width:105px;font-size:12px;padding:8px 26px 8px 9px}
   .hub-difficulty-note{font-size:10px;text-align:center}
   .sources .source-links{gap:8px}
+}
+
+/* Abertura e partida concentram os controles e deixam a lâmina no fundo. */
+.hub{display:block;width:min(940px,100%);max-width:940px;margin-inline:auto}
+.hub .hub-hero{display:block;min-height:0;margin:0 0 22px;padding:0;text-align:left}
+.hub .hub-hero h1{margin:0;font-family:Georgia,serif;font-size:clamp(36px,6vw,64px);font-weight:700;letter-spacing:-.045em;text-shadow:none}
+.hub .hub-hero h1 span{color:#8b5226}
+.hub .hub-bottom,.hub .hub-difficulty{
+  width:100%;margin:0 0 12px;padding:15px 18px;border:1px solid #aabcb1;border-radius:10px;
+  background:#fffdf5;box-shadow:none;color:#244e50
+}
+.hub .hub-bottom{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.hub .hub-bottom .collection-summary{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px}
+.collection-summary h2{margin:0;font-size:16px;line-height:1.4}
+.collection-summary span{color:#45635b;font-size:13px}
+#collection-progress{width:100%;height:9px;display:block;border:0;border-radius:6px;overflow:hidden;accent-color:#286c59;background:#e2e9e2}
+#collection-progress::-webkit-progress-bar{background:#e2e9e2}
+#collection-progress::-webkit-progress-value{background:#286c59}
+#collection-progress::-moz-progress-bar{background:#286c59}
+.hub .hub-difficulty{justify-content:space-between;gap:8px 16px;margin-bottom:26px}
+.hub .hub-difficulty .difficulty-control{font-size:14px;gap:12px}
+.hub .hub-difficulty .difficulty-select{min-height:40px;padding:7px 24px 7px 10px;box-shadow:none;border:1px solid #819e91;color:#274f48;font:600 14px system-ui,sans-serif}
+.hub .hub-difficulty-note{font-size:13px;color:#45635b;text-align:left}
+.hub .hub-section-heading{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin:0 0 12px;color:#294e51}
+.hub .hub-choices{padding:0}
+.hub .hub-section-heading h2{margin:0;font:700 22px Georgia,serif;letter-spacing:-.02em;color:inherit}
+.hub .hub-section-heading>span{font-size:13px;font-weight:600}
+.hub .hub-mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.hub .hub-card{display:grid;grid-column:auto;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;min-height:0;padding:15px;
+  border:1px solid #829f93;border-radius:10px;background:#fffdf5;box-shadow:0 2px 5px #28463918;text-align:left}
+.hub .hub-card:hover{transform:none;background:#f4f8f0;box-shadow:0 3px 10px #28463924;border-color:#416d60}
+.hub .hub-card-art-icon{position:static;display:grid;width:38px;height:38px;margin:0;border:0;border-radius:7px;box-shadow:none;background:#e2ede5;color:#246353;transform:none}
+.hub .hub-card-art-icon svg{width:22px;height:22px}
+.hub .hub-card-copy{display:grid;align-content:start;min-width:0;padding:0;gap:4px}
+.hub .hub-card-copy b{font:700 21px Georgia,serif;color:#214d49}
+.hub .hub-card-sub{font:400 13px/1.35 system-ui,sans-serif;color:#425f58}
+.hub .hub-card-foot{grid-column:2;margin:0;padding:0;border:0;background:none;box-shadow:none;font:650 13px/1.3 system-ui,sans-serif;color:#215e50}
+
+.game-shell .game-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:0;padding:0;margin:0 0 14px}
+.game-heading .back-home{font-size:14px;text-transform:none}
+.game-shell .game-heading h1{order:-1;margin:0;font:700 clamp(30px,5vw,48px)/1.1 Georgia,serif;letter-spacing:-.03em;text-shadow:none}
+.game-shell .mini-mode-nav{margin-top:0}
+.main-card{border-width:1px;box-shadow:0 4px 12px #2846391a}
+.game-count{font-size:14px;font-weight:700;color:#284f50}
+.prompt-zone .search-icon{display:none}
+.prompt-zone .guess-input{padding-left:12px;font-size:16px}
+.field-label small{color:#435e53}
+.suggestion{min-height:44px;padding:8px 11px}
+.suggestion-copy{gap:2px}
+.catalog-list .catalog-item{grid-template-columns:minmax(0,1fr) auto}
+.result .result-head h2{margin:0 0 4px;font:700 22px/1.2 Georgia,serif;color:#204f46}
+.result .outline-small,.result .solid-small{min-height:40px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.result-profile{scroll-margin-top:12px}
+.board-intro h2,.hints-heading h2{margin:0;color:#244c4e;font-size:15px;line-height:1.5}
+.board-intro>span{color:#435e53}
+.board-empty{padding:16px 20px;color:#435e53;background:#f7f9f3}
+.main-card .legend-compact{margin:0 24px 10px;padding:0;gap:7px;justify-content:flex-start}
+.main-card .legend-compact .legend-pill,.main-card .legend-compact .arrow-note{color:#365c56;font-size:12px}
+.board-scroll-help{display:none}
+.guess-board th[scope="row"]{font-size:13px;line-height:1.25;text-transform:none;letter-spacing:0;text-align:left;color:#244c4e}
+.guess-board th.name-col{background:#fffdf5;border:1px solid #869d90;border-radius:7px;padding:7px 9px}
+.guess-board .cell-content{font-size:12px}
+.attempt-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}
+.attempt-item>span.attempt-status:last-child{font-size:12px;color:#435e53}
+.hints-revealed .hint-entry{grid-template-columns:1fr}
+.photo-pair-item .challenge-photo[hidden],.photo-fallback[hidden],.photo-loading[hidden],.photo-gallery img[hidden]{display:none}
+.photo-pair-item .challenge-photo-frame{position:relative;height:clamp(155px,32vw,330px);background:#edece4}
+.photo-pair-item figcaption{display:grid;justify-items:center;gap:4px;color:#264b52}
+.photo-preview-button,[data-retry-photo]{
+  min-height:36px;padding:4px 8px;border:1px solid #759587;border-radius:6px;background:#fbfff9;color:#255849;font:650 12px system-ui,sans-serif
+}
+.photo-preview-button:disabled{opacity:.75}
+.photo-loading,.photo-fallback{color:#405b51;font-size:13px;line-height:1.4;text-align:center;padding:6px}
+.photo-dialog{width:min(900px,calc(100vw - 20px))}
+.photo-dialog .photo-dialog-content{margin:10px;padding:0}
+.photo-dialog img{display:block;width:100%;max-height:72vh;object-fit:contain;background:#ebeae2}
+.photo-dialog figcaption{margin-top:8px;color:#345a52}
+#share-text{display:block;width:100%;margin-top:8px;padding:8px;border:1px solid #759587;border-radius:6px;color:#254b46;background:#fbfff9;font:inherit;resize:vertical}
+:is(button,a,input,select,textarea,[tabindex]):focus-visible{outline:2px solid #176653;outline-offset:2px}
+.hub .hub-difficulty .difficulty-select:focus-visible{outline:2px solid #176653;outline-offset:2px}
+@media(max-width:900px){
+  .board-scroll-help{display:block;color:#435e53;font-size:12px;margin:0 24px 7px}
+  .guess-board{table-layout:fixed;width:max(1100px,100%)}
+  .guess-board thead th{white-space:normal;overflow-wrap:anywhere}
+  .guess-board th:first-child{position:sticky;left:0;z-index:2;background:#fffdf5}
+  .guess-board th:first-child{width:110px}
+  .guess-board .name-col,.guess-board td{overflow-wrap:anywhere}
+}
+@media(max-width:680px){
+  .hub .hub-hero{margin-bottom:14px}
+  .hub .hub-bottom,.hub .hub-difficulty{padding:11px 12px}
+  .hub .hub-difficulty{margin-bottom:20px}
+  .hub .hub-mode-grid{grid-template-columns:1fr;gap:9px}
+  .hub .hub-card{padding:10px 12px;column-gap:10px;row-gap:3px}
+  .hub .hub-card-copy b{font-size:20px}
+  .hub .hub-section-heading h2{font-size:20px}
+  .main-card .legend-compact,.board-scroll-help{margin-left:12px;margin-right:12px}
+  .game-top-row{flex-wrap:wrap;gap:8px}
+  .game-top-row .game-controls{width:auto}
+  .attempt-item{gap:6px}
+  .photo-pair-item figcaption{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important}
 }

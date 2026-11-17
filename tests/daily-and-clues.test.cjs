@@ -1,16 +1,9 @@
-const fs = require('node:fs');
-const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
-const html = fs.readFileSync(file, 'utf8');
-const start = html.indexOf("'use strict'", html.indexOf('<script'));
-const end = html.indexOf('const root =', start);
-assert.ok(start !== -1 && end > start, 'A estrutura do script não foi encontrada');
-const script = html.slice(start, end);
-const ctx = {};
-vm.runInNewContext(script + '\nglobalThis.__test = {getLocalDateKey, redactMineralName, buildProgressiveClues, MINERALS};', ctx, {timeout: 30000});
-const {getLocalDateKey, redactMineralName, buildProgressiveClues, MINERALS} = ctx.__test;
+const { readGame, getGame } = require('../scripts/load-game.cjs');
+const { html } = readGame(file);
+const { getLocalDateKey, redactMineralName, buildProgressiveClues, MINERALS } = getGame(["getLocalDateKey","redactMineralName","buildProgressiveClues","MINERALS"], file);
 
 const originalTZ = process.env.TZ;
 try {
@@ -27,6 +20,7 @@ try {
 const rinkita = MINERALS.find(m => m.name === 'Rinkita-(Ce)');
 assert.ok(rinkita, 'A Rinkita-(Ce) deve estar no catálogo');
 assert.equal(redactMineralName('A Rinkita-(Ce) ocorre em rochas alcalinas.', rinkita), 'A [mineral] ocorre em rochas alcalinas.');
+assert.equal(redactMineralName('A rinkita-(Ce) ocorre em rochas alcalinas.', rinkita), 'A [mineral] ocorre em rochas alcalinas.');
 const synthetic = {name: 'A+B (Ce)', aliases: ['X.Y']};
 assert.equal(redactMineralName('A+B (Ce) e X.Y; não AAB (Ce) nem XqY', synthetic), '[mineral] e [mineral]; não AAB (Ce) nem XqY');
 for (const m of MINERALS.filter(x => x.playable)) {
@@ -36,8 +30,8 @@ const corindon = MINERALS.find(m => m.id === 'corindon');
 const espodumenio = MINERALS.find(m => m.id === 'espodumenio');
 assert.ok(buildProgressiveClues(corindon)[0].value.startsWith('[mineral]'), 'Corindon sem acento não deve revelar a resposta');
 assert.ok(buildProgressiveClues(espodumenio)[0].value.includes('[mineral]'), 'Erro de transcrição de espodumênio deve ser ocultado');
-assert.ok(html.includes('data-thumb-fallback'), 'Palpites sem imagem precisam de ícone substituto');
-assert.ok(html.includes('celebrationPending=true'), 'Acerto deve ativar a comemoração');
-assert.ok(html.includes('prefers-reduced-motion'), 'Comemoração deve respeitar movimento reduzido');
-assert.ok(html.includes('${catalogDetail(m)}</section>'), 'Ficha final deve reutilizar a ficha completa do catálogo');
-console.log('OK: pistas sem vazamentos, ícones substitutos, comemoração e ficha completa');
+assert.ok(html.includes('data-retry-photo'), 'Falha na foto precisa de ação de recuperação');
+assert.match(html,/if\(m\.id===state\.targetId\)discover\(m\.id\)/, 'Acerto deve registrar o mineral na coleção');
+assert.doesNotMatch(html,/function celebrateWin|function startReveal/, 'Resultado e tabela devem aparecer sem espera');
+assert.ok(html.includes("${catalogDetail(m,'result')}</section>"), 'Ficha final deve reutilizar a ficha completa do catálogo');
+console.log('OK: pistas sem vazamentos, recuperação da foto, coleção e ficha completa');

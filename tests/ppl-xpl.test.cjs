@@ -1,19 +1,11 @@
 const fs = require('node:fs');
-const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
-const html = fs.readFileSync(file, 'utf8');
-const start = html.indexOf("'use strict'", html.indexOf('<script'));
-const end = html.indexOf('const root =', start);
-assert.ok(start >= 0 && end > start, 'Lógica principal do jogo deve estar disponível');
-
-const ctx = {};
-vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MINERALS, MODES, getPhotoPair, getPhotoImages, getEligibleForMode, getModeDailyId, getDailyModeSummary};',
-  ctx, {timeout: 30000});
-const {MINERALS, getPhotoPair, getPhotoImages, getEligibleForMode, getModeDailyId, getDailyModeSummary} = ctx.__test;
+const { readGame, getGame } = require('../scripts/load-game.cjs');
+const { html } = readGame(file);
+const { MINERALS, MODES, getPhotoPair, getPhotoImages, getEligibleForMode, getModeDailyId, getDailyModeSummary } = getGame(["MINERALS","MODES","getPhotoPair","getPhotoImages","getEligibleForMode","getModeDailyId","getDailyModeSummary"], file);
 const byId = new Map(MINERALS.map(m => [m.id, m]));
 const photo = getEligibleForMode(MINERALS, 'photo');
 
@@ -24,7 +16,7 @@ assert.ok(photo.every(m => m.playable && getPhotoImages(m)?.length === 2),
 for (const mineral of photo) {
   const images = getPhotoImages(mineral);
   assert.equal(images.length, 2, mineral.name + ': duas fotografias');
-  assert.ok(images.every(im => im.src.startsWith('data:image/') && im.verifiedForSpecies !== false),
+  assert.ok(images.every(im => im.src.startsWith('assets/minerals/') && im.verifiedForSpecies !== false),
     mineral.name + ': nenhuma foto pode ser genérica de grupo');
   assert.notEqual(images[0].src, images[1].src, mineral.name + ': fotos distintas');
   const pair = getPhotoPair(mineral);
@@ -81,14 +73,12 @@ const migrated=getDailyModeSummary(MINERALS,[{id:'photo'}],day,
   ()=>({targetId:'alvo-anterior',guesses:[currentTarget]}));
 assert.equal(migrated[0].status,'available',
   'Um palpite antigo não pode vencer indevidamente o novo desafio');
-assert.match(html, /const staleProgress=Boolean\(prior\.targetId&&prior\.targetId!==targetId\)/,
-  'Partidas persistidas com outro alvo devem descartar palpites antigos');
+assert.equal(migrated[0].attempts, 0, 'Alvo legado desconhecido não preserva palpites');
 
 const stage = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function challengeClues()'));
 assert.match(stage, /photo-pair/);
 assert.match(stage, /getPhotoImages/);
-assert.doesNotMatch(stage, /photo-pair-label|pair\.ppl|pair\.xpl/,
-  'A tela de desafio não deve rotular iluminação nem pressupor um par');
+assert.match(stage, /photoLighting/, 'A legenda deve usar apenas a iluminação catalogada');
 assert.match(stage, /<img class="challenge-photo"/);
 assert.match(stage, /alt="Fotomicrografia /);
 assert.doesNotMatch(stage, /grayscale\(|blur\(|pixel-canvas/,

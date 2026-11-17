@@ -1,5 +1,7 @@
 # Auditoria fotográfica do Petrodle v0.8
 
+Este é o registro histórico da v0.8. Consulte a [auditoria reproduzível atual](docs/AUDITORIA_DO_CATALOGO.md) e o [acervo por imagem](data/acervo.csv) para o catálogo em uso.
+
 ## Cobertura da versão
 
 | Situação | Espécies |

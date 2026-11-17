@@ -3,16 +3,17 @@ const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const html = readFileSync(path.join(root, 'index.html'), 'utf8');
+const { readGame } = require('../scripts/load-game.cjs');
+const { html } = readGame();
 const css = readFileSync(path.join(root, 'game.css'), 'utf8');
 
-assert.match(html, /<link rel="stylesheet" href="game\.css\?v=4">/,
+assert.match(html, /<link rel="stylesheet" href="game\.css\?v=5">/,
   'O tema publicado deve ser carregado pelo jogo');
 assert.match(html, /const MODES = Object\.freeze\(\[/,
   'As modalidades de jogo devem permanecer na interface');
 for (const id of ['classic', 'photo', 'description'])
   assert.match(html, new RegExp("id:'" + id + "'"));
-assert.match(html, /MODOS DE JOGO/, 'A apresentação deve identificar as modalidades sem duplicar chamadas diárias');
+assert.doesNotMatch(html, /MODOS DE JOGO/, 'O título das opções dispensa rótulo redundante');
 assert.match(html, /Escolha sua partida/);
 assert.match(html, /function classicBoard\(/);
 assert.match(html, /function challengeImage\(/);

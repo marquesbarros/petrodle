@@ -1,8 +1,7 @@
-const fs=require('node:fs');
-const path=require('node:path');
 const assert=require('node:assert/strict');
 const vm=require('node:vm');
-const html=fs.readFileSync(process.argv[2]||path.join(__dirname,'..','index.html'),'utf8');
+const { readGame } = require('../scripts/load-game.cjs');
+const { html } = readGame(process.argv[2]);
 function section(start,end){
  const i=html.indexOf(start),j=html.indexOf(end,i+start.length);
  assert.ok(i>=0&&j>i,'Seção não encontrada: '+start);
@@ -11,13 +10,15 @@ function section(start,end){
 const home=section('function home(){','function legend(){');
 const game=section('function gameShell(){','function footer(){');
 const main=section('function mainGame(){','function hintSection(){');
-const catalog=section('function catalogDialog(){','function catalogThumb(');
+const catalog=section('function catalogDialog(){','function showCatalog(');
 const catalogSearch=section('function showCatalog(','function catalogDetail(');
 const footer=section('function footer(){','function mainGame(){');
 assert.match(home,/id="difficulty"/,'Dificuldade selecionável antes de jogar');
 assert.ok(home.indexOf('id="difficulty"')<home.indexOf('class="hub-choices"'),'Seletor deve vir antes dos modos');
 assert.doesNotMatch(main,/id="difficulty"/,'Não duplicar o seletor dentro da partida');
-assert.match(home,/jogos e catálogo/,'A seleção precisa esclarecer seu alcance');
+assert.match(home,/catálogo deste nível/,'A seleção precisa esclarecer seu alcance');
+assert.ok(home.indexOf('<progress id="collection-progress"')<home.indexOf('id="difficulty"'),'Coleção imediatamente antes da dificuldade');
+assert.doesNotMatch(home,/DESAFIO MINERALÓGICO|Três maneiras de descobrir o mundo dos minerais|MODOS DE JOGO/);
 assert.match(catalogSearch,/getCatalogMinerals\(MINERALS,state\.difficulty\)/,'Busca restrita à dificuldade');
 assert.match(catalog,/getCatalogMinerals\(MINERALS,state\.difficulty\)/,'Cabeçalho reflete filtro');
 assert.doesNotMatch(game,/<p>\$\{game\.id===/,'Título não contém tutorial');
@@ -28,7 +29,7 @@ assert.doesNotMatch(modes,/tentativas|palpites|Compare duas|Identifique pelas/,'
 assert.match(footer,/FRANK, H\. T\./);
 assert.match(footer,/Guia de Minerais Transparentes ao Microscópio Petrográfico/);
 assert.match(footer,/mailto:marquesbarros\.geo@gmail\.com/);
-assert.match(footer,/jogo de acesso livre e gratuito/);
+assert.match(footer,/acesso gratuito/);
 assert.match(html,/const GUIDE_URL='https:\/\/www\.ufrgs\.br\/minmicro\/'/);
 const helper=section('function getCatalogMinerals(','function catalogDialog(){');
 const fake={getDifficultyMinerals:(all,level)=>all.filter(m=>level==='easy'?m.id==='a':m.id!=='d')};

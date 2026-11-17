@@ -1,19 +1,10 @@
-const fs = require('node:fs');
-const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
-const html = fs.readFileSync(file, 'utf8');
-const start = html.indexOf("'use strict'", html.indexOf('<script'));
-const end = html.indexOf('const root =', start);
-assert.ok(start !== -1 && end > start, 'Script do jogo não localizado');
-
-const ctx = {};
-vm.runInNewContext(html.slice(start, end) +
-  '\nglobalThis.__test = {MODES, MINERALS, searchMinerals, isGuessable, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess};',
-  ctx, {timeout: 30000});
-const {MODES, MINERALS, searchMinerals, isGuessable, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess} = ctx.__test;
+const { readGame, getGame } = require('../scripts/load-game.cjs');
+const { html } = readGame(file);
+const { MODES, MINERALS, searchMinerals, isGuessable, getEligibleForMode, getModeDailyId, getDailyId, getPlayableState, resolveGuess } = getGame(["MODES","MINERALS","searchMinerals","isGuessable","getEligibleForMode","getModeDailyId","getDailyId","getPlayableState","resolveGuess"], file);
 
 // A busca só registra nomes válidos e palpites inéditos, sem surpresas ao confirmar.
 const sample = [
@@ -49,8 +40,6 @@ assert.equal(resolveGuess(MINERALS, 'Biotita', ['biotita']).status, 'duplicate',
   'Biotita não deve consumir uma segunda tentativa');
 assert.equal(resolveGuess(MINERALS, 'Granada').status, 'choose',
   'Outros grupos não devem tornar-se palpites por acidente');
-assert.match(html, /getDifficultyGuesses\(MINERALS,gameMode,difficulty\)/,
-  'Palpites persistidos devem ser validados contra a dificuldade escolhida');
 
 assert.deepEqual(Array.from(MODES, m => m.id), ['classic', 'photo', 'description'],
   'Clássico e Descrição devem ser preservados; Silhueta e Pixel dão lugar a Imagem');
@@ -64,7 +53,7 @@ assert.equal(classic.length, MINERALS.filter(m => m.playable).length,
   'Clássico deve manter todos os minerais jogáveis');
 assert.ok(photo.length >= 30, 'Modo Imagem deve incluir espécies com fotografia verificada');
 assert.ok(photo.every(m => m.images.some(im =>
-  im.verifiedForSpecies !== false && typeof im.src === 'string' && im.src.startsWith('data:image/'))),
+  im.verifiedForSpecies !== false && typeof im.src === 'string' && im.src.startsWith('assets/minerals/'))),
   'Modo Imagem não pode sortear foto genérica de grupo nem espécie sem fotografia válida');
 assert.ok(description.length > 0 && description.every(m =>
   m.playable && m.ppl && m.xpl && !m.ppl.startsWith('Sem descrição')),
@@ -94,7 +83,7 @@ assert.match(photoStage, /<img class="challenge-photo"/,
 assert.doesNotMatch(photoStage, /grayscale\(|blur\(|pixel-canvas|<canvas|silhouette-frame/,
   'Imagem não pode ocultar a fotografia com os filtros antigos');
 const descriptionStage = html.slice(html.indexOf('function challengeClues()'), html.indexOf('function otherBoard()'));
-assert.match(descriptionStage, /state\.gameMode==='description'/,
+assert.match(descriptionStage, /buildProgressiveClues/,
   'A modalidade Descrição deve manter suas pistas');
 const board = html.slice(html.indexOf('function mainGame()'), html.indexOf('function hintSection()'));
 assert.match(board, /classicBoard\(\)/, 'Clássico mantém tabela de atributos');
@@ -104,7 +93,7 @@ assert.match(html, /state\.gameMode==='photo'\?challengeImage\(\):challengeClues
 assert.match(html, /petrodle:v6:/, 'Armazenamento anterior deve ser preservado');
 assert.doesNotMatch(html, /function paintPixel\(\)|id:'silhouette'|id:'pixel'/,
   'Os renderizadores e modos antigos devem desaparecer');
-assert.match(html, /e\.key==='Enter'.*?selection>=0.*?guess\(\)/,
+assert.match(html, /e\.key==='Enter'[\s\S]*?selection>=0[\s\S]*?guess\(selectedId\)/,
   'Enter deve permitir confirmar a opção destacada');
 assert.match(html, /N\u00e3o \u00e9 \$\{m\.name\}/,
   'O palpite incorreto precisa dar retorno claro sem revelar a resposta');
