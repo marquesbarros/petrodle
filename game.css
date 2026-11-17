@@ -773,7 +773,7 @@ body{
 }
 .hub-difficulty .difficulty-select:focus-visible{outline:3px solid #f3ba51;outline-offset:2px}
 .hub-difficulty-note{font-size:11px;font-weight:800;color:#53747a}
-.sources .source-links{display:flex;flex-direction:column;align-items:center;gap:7px}
+.sources .source-links{display:flex;width:100%;flex-direction:column;align-items:center;gap:7px}
 .sources .source-links span{max-width:900px;line-height:1.6;text-align:center;color:#345a63}
 .sources a{color:#155976;text-decoration:underline;text-underline-offset:2px}
 .sources a:hover{color:#0c3f54}
