@@ -227,12 +227,28 @@ async function enterGuess(page, guess) {
 async function verifyClipboard(page, mode, answer) {
   await enterGuess(page, answer);
   await page.locator('#result-title').filter({ hasText: answer }).waitFor();
+  await page.locator('.result #answer-profile').getByRole('heading', { name: answer }).waitFor();
+  assert.equal(await page.locator('#review-answer').count(), 0);
   await page.locator('#share').click();
   await page.getByText(/Resultado copiado/).waitFor();
   const text = await page.evaluate(() => navigator.clipboard.readText());
   assert.match(text, new RegExp(`Petrodle ${mode}`));
   assert.match(text, /#Petrodle/);
   assert.ok(!text.includes(answer), 'O compartilhamento revela a resposta');
+}
+
+async function assertCenteredGuess(page) {
+  const centered = await page.locator('.guess-board tbody .name-col').first().evaluate(cell => {
+    const box = cell.getBoundingClientRect();
+    const group = cell.querySelector('.guess-mineral-wrap').getBoundingClientRect();
+    const image = cell.querySelector('.mineral-thumbnail').getBoundingClientRect();
+    const name = cell.querySelector('.mineral-name').getBoundingClientRect();
+    const center = box.left + box.width / 2;
+    return Math.abs(image.left + image.width / 2 - center) < 2 &&
+      Math.abs(name.left + name.width / 2 - center) < 2 &&
+      Math.abs(group.top + group.height / 2 - (box.top + box.height / 2)) < 2;
+  });
+  assert.ok(centered, 'O nome e a miniatura ficam centralizados na célula');
 }
 
 async function verifyPhotoTools(page) {
@@ -380,6 +396,7 @@ async function verify(browser, url) {
     await enterGuess(page, 'Quartzo');
     await page.locator('.guess-board tbody tr').filter({ hasText: 'Quartzo' }).waitFor();
     await page.waitForFunction(() => document.querySelector('.guess-board .mineral-thumbnail img')?.naturalWidth > 0);
+    await assertCenteredGuess(page);
     await page.waitForFunction(() => !document.querySelector('#guess-input').disabled);
     const focusAfterGuess = await input.evaluate(el => el === document.activeElement);
     assert.equal(await input.getAttribute('aria-expanded'), 'false', 'Uma busca vazia não deve encobrir o tabuleiro');
@@ -479,6 +496,9 @@ async function verifyOutcomesAndTraining(browser, url) {
       await page.locator('#result-title').filter({ hasText: answer }).waitFor();
       const input = page.locator('#guess-input');
       assert.ok(!await input.count() || !await input.isEnabled(), 'A derrota encerra os palpites');
+      assert.equal(await page.locator('.result #answer-profile').count(), 0);
+      await page.locator('#review-answer').click();
+      assert.ok(await page.locator('#answer-profile').evaluate(profile => profile === document.activeElement));
       await page.locator('.back-home').click();
     }
 
@@ -491,10 +511,16 @@ async function verifyOutcomesAndTraining(browser, url) {
       assert.equal(await training.getAttribute('aria-pressed'), 'true');
       await enterGuess(page, 'Calcita');
       await page.locator('#result-title').filter({ hasText: 'Calcita' }).waitFor();
+      await page.locator('.result #answer-profile').waitFor();
       assert.equal(await page.locator('#result-title').evaluate(title => title === document.activeElement), true);
       assert.equal(await page.locator('#next, #next-result').count(), 1,
         'Treino encerrado oferece uma única ação de novo mineral');
       if (mode === 'classic') {
+        const gap = await page.locator('.result').evaluate(result =>
+          result.getBoundingClientRect().top - result.previousElementSibling.getBoundingClientRect().bottom,
+        );
+        assert.ok(gap >= 16, 'O aviso verde tem respiro abaixo do cabeçalho');
+        await screenshot(page, 'atual-ficha-no-aviso-verde', true);
         await page.locator('#share').click();
         const share = page.locator('#share-dialog');
         await share.waitFor();
@@ -521,8 +547,9 @@ async function verifyOutcomesAndTraining(browser, url) {
     assert.equal(await daily.getAttribute('aria-pressed'), 'true',
       'O cartão do início abre o Diário, como indica o estado que ele exibe');
     await page.locator('#result-title').filter({ hasText: 'Fluorita' }).waitFor();
-    await page.locator('#review-answer').click();
-    assert.equal(await page.locator('#answer-profile').evaluate(profile => profile === document.activeElement), true);
+    await page.locator('#review-answer').waitFor();
+    await page.locator('#answer-profile').waitFor();
+    assert.equal(await page.locator('.result #answer-profile').count(), 0);
   } finally {
     await context.close();
   }
@@ -560,6 +587,7 @@ async function verifyLocalAndMobile(browser, root, label) {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
     if (label === 'atual') {
       assert.ok(await page.locator('.guess-board .cell.unknown').count(), 'O teste móvel inclui células sem comparação');
+      await assertCenteredGuess(page);
       const table = await page.locator('.board-scroll').evaluate(board => {
         const mineral = board.querySelector('tbody tr .name-col');
         board.scrollLeft = board.scrollWidth;

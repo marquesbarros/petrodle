@@ -867,15 +867,24 @@ body{
   .guess-board .guess-mineral-wrap .mineral-thumbnail{width:27px;height:27px;flex-basis:27px}
 }
 .result .result-head h2{margin:0 0 4px;font:700 22px/1.2 Georgia,serif;color:#204f46}
+.main-card > .result{margin-top:clamp(16px,2vw,24px)}
 .result .outline-small,.result .solid-small{min-height:40px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .result-profile{scroll-margin-top:12px}
+.result .result-profile-embedded{
+  margin:18px 0 0;padding:16px 0 0;
+  border:0;border-top:1px solid #83ae91;border-radius:0;
+  background:transparent;box-shadow:none
+}
+.result-profile-embedded .catalog-copyright{color:#435e53}
 .board-intro h2,.hints-heading h2{margin:0;color:#244c4e;font-size:15px;line-height:1.5}
 .board-intro>span{color:#435e53}
 .board-empty{padding:16px 20px;color:#435e53;background:#f7f9f3}
 .main-card .legend-compact{margin:0 24px 10px;padding:0;gap:7px;justify-content:flex-start}
 .main-card .legend-compact .legend-pill,.main-card .legend-compact .arrow-note{color:#365c56;font-size:12px}
 .board-scroll-help{display:none}
-.guess-board th[scope="row"]{font-size:13px;line-height:1.25;text-transform:none;letter-spacing:0;text-align:left;color:#244c4e}
+.guess-board th[scope="row"]{font-size:13px;line-height:1.25;text-transform:none;letter-spacing:0;text-align:center;vertical-align:middle;color:#244c4e}
+.guess-board thead th:first-child{text-align:center;padding-inline:3px}
+.guess-board .guess-mineral-wrap,.attempt-item .guess-mineral-wrap{flex-direction:column;justify-content:center;gap:4px;text-align:center}
 .guess-board th.name-col{background:#fffdf5;border:1px solid #869d90;border-radius:7px;padding:7px 9px}
 .guess-board .cell-content{font-size:12px}
 .attempt-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}

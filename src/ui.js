@@ -129,10 +129,8 @@ function gallery(m){
  if(!m.images.length)return `<p class="photo-missing">Sem imagem atribuível a uma espécie específica neste verbete.</p>`;
  return `<div class="photo-gallery">${m.images.map(im=>`<figure><img loading="lazy" ${im.external?'data-external="1"':''} src="${esc(im.src)}" alt="${esc(im.external?`${im.imageType}; ${m.name}`:im.verifiedForSpecies===false?`Imagem ilustrativa de ${m.parentGroup||m.name} sem confirmação de espécie`:`Fotomicrografia do guia para ${m.name}`)}"><span class="photo-fallback" hidden>Não foi possível carregar a imagem externa.</span><figcaption>${im.external?`<a href="${esc(im.url)}" target="_blank" rel="noopener noreferrer">${esc(im.imageType||'Fotografia')} · Wikimedia Commons</a><small>${esc(im.author)} · ${esc(im.license)}</small>`:`${im.verifiedForSpecies===false?'Imagem ilustrativa do grupo, sem identificação individual':'Fotomicrografia do guia'} · p. ${im.page}`}</figcaption></figure>`).join('')}</div>`;
 }
-function profile(){
- if(!status().ended)return '';
- const m=byId.get(state.targetId);
- return `<section class="aside-card result-profile" id="answer-profile" tabindex="-1" aria-label="Ficha mineralógica completa após a partida">${catalogDetail(m,'result')}</section>`;
+function profile(m, insideResult=false){
+ return `<section class="aside-card result-profile${insideResult?' result-profile-embedded':''}" id="answer-profile" tabindex="-1" aria-label="Ficha mineralógica completa após a partida">${catalogDetail(m,'result')}</section>`;
 }
 function getCatalogMinerals(minerals,difficulty='hard'){
  if(difficulty==='hard')return minerals;
@@ -251,7 +249,7 @@ function mainGame(){
    ${isClassic?classicBoard():otherBoard()}
    ${!result.ended?hintSection():''}
    ${!isDaily&&!result.ended?`<div class="board-footer"><button type="button" id="next" class="text-action">Trocar mineral</button>${state.guesses.length?'<span class="small-note">Inicia outro treino.</span>':''}</div>`:''}
- </section>${profile()}`;
+ </section>${result.lost?profile(byId.get(state.targetId)):''}`;
 }
 function hintSection(){
  const count=state.guesses.length;
@@ -300,9 +298,10 @@ function resultBanner(){
    ${resultEvidence(target)}
    <div class="result-actions">
      ${state.playMode==='training'?'<button type="button" id="next" class="solid-small">Próximo mineral</button>':''}
-     <a class="outline-small" href="#answer-profile" id="review-answer">Ver ficha</a>
+     ${result.lost?'<a class="outline-small" href="#answer-profile" id="review-answer">Ver ficha</a>':''}
      <button type="button" class="outline-small" id="share">Compartilhar resultado</button>
    </div>
+   ${result.won?profile(target,true):''}
  </section>`;
 }
 function dialogs(){
