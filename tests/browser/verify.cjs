@@ -303,7 +303,11 @@ async function verify(browser, url) {
       cards.map(card => Math.round(card.getBoundingClientRect().top)),
     );
     assert.equal(desktopCards.length, 3);
-    assert.equal(new Set(desktopCards).size, 1, 'Os três modos ocupam a mesma linha em tela larga');
+    assert.equal(new Set(desktopCards).size, 3, 'Os cartões ilustrados ocupam linhas separadas');
+    await page.waitForFunction(() => {
+      const images = [...document.querySelectorAll('.hub-card-art img')];
+      return images.length === 3 && images.every(image => image.naturalWidth > 0);
+    });
     for (const text of ['DESAFIO MINERALÓGICO', 'Três maneiras de descobrir o mundo dos minerais.', 'MODOS DE JOGO']) {
       assert.equal(await page.getByText(text, { exact: true }).count(), 0);
     }
@@ -343,6 +347,8 @@ async function verify(browser, url) {
     assert.equal(await diagnostic.getByRole('link', { name: /Coombs/ }).count(), 1);
     a11y.push(await inspectAccessibility(page, 'catálogo com nota diagnóstica'));
     await catalog.locator('#catalog-search').fill('Albita');
+    await catalog.locator('[data-catalog-id="albita"] .mineral-thumbnail img').waitFor();
+    await catalog.locator('[data-catalog-id="albita"] .thumbnail-scope').waitFor();
     await catalog.locator('[data-catalog-id="albita"]').click();
     await catalog.getByRole('heading', { name: 'Albita' }).waitFor();
     await catalog.locator('.photo-fallback').filter({ visible: true }).first().waitFor();
@@ -361,6 +367,7 @@ async function verify(browser, url) {
     assert.ok(invalid.trim(), 'Palpite inválido recebe uma explicação');
     assert.equal(await page.locator('.guess-board tbody tr').count(), 0);
     await input.fill('Quar');
+    await page.waitForFunction(() => document.querySelector('#suggestions [data-id="quartzo"] .mineral-thumbnail img')?.naturalWidth > 0);
     await input.press('ArrowDown');
     await page.getByRole('option', { selected: true }).getByText('Quartzo', { exact: true }).waitFor();
     const activeOptionId = await input.getAttribute('aria-activedescendant');
@@ -372,6 +379,7 @@ async function verify(browser, url) {
     const activeOptionCleared = await input.getAttribute('aria-activedescendant') === null;
     await enterGuess(page, 'Quartzo');
     await page.locator('.guess-board tbody tr').filter({ hasText: 'Quartzo' }).waitFor();
+    await page.waitForFunction(() => document.querySelector('.guess-board .mineral-thumbnail img')?.naturalWidth > 0);
     await page.waitForFunction(() => !document.querySelector('#guess-input').disabled);
     const focusAfterGuess = await input.evaluate(el => el === document.activeElement);
     assert.equal(await input.getAttribute('aria-expanded'), 'false', 'Uma busca vazia não deve encobrir o tabuleiro');
@@ -408,6 +416,7 @@ async function verify(browser, url) {
     await page.locator('.description-stage .clue-row').waitFor();
     for (const answer of ['Quartzo', 'Calcita', 'Muscovita']) await enterGuess(page, answer);
     assert.equal(await page.locator('.attempt-item').count(), 3);
+    await page.waitForFunction(() => document.querySelector('.attempt-item .mineral-thumbnail img')?.naturalWidth > 0);
     await page.locator('#hint').click();
     assert.equal(await page.locator('.hint-entry').count(), 1);
     a11y.push(await inspectAccessibility(page, 'Descrição com dica revelada'));

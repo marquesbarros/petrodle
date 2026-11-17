@@ -13,7 +13,8 @@ function readGame(file = entry) {
   }
   const root = path.dirname(path.resolve(file));
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*>/g)]
-    .map(([, src]) => [src, fs.readFileSync(path.join(root, src), 'utf8')]);
+    .map(([, src]) => src.split(/[?#]/, 1)[0])
+    .map(src => [src, fs.readFileSync(path.join(root, src), 'utf8')]);
   if (!scripts.length) throw new Error('Scripts do Petrodle não encontrados');
   return {
     html: html + '\n' + scripts.map(([, code]) => code).join('\n'),

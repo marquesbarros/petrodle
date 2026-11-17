@@ -50,12 +50,39 @@ function cell(m,key,grading){
    <span class="cell-flag" aria-hidden="true">${marks[grading.status]}</span>
  </td>`;
 }
+function mineralThumbnail(mineral){
+ const photo=getSuggestionImage(mineral);
+ const fallback=photo?.external?getOfflineFallback(mineral):null;
+ return `<span class="mineral-thumbnail">
+   <span class="thumbnail-placeholder">${logo}</span>
+   ${photo?`<img data-thumbnail loading="lazy" decoding="async" src="${esc(photo.src)}" alt="" ${fallback?`data-group-fallback="${esc(fallback.src)}"`:''}>
+     <span class="thumbnail-scope" title="Imagem ilustrativa do grupo" ${photo.verifiedForSpecies===false?'':'hidden'}>Grupo</span>`:''}
+ </span>`;
+}
+function bindThumbnails(scope){
+ for(const image of scope.querySelectorAll('[data-thumbnail]')){
+   const scopeLabel=image.parentElement.querySelector('.thumbnail-scope');
+   function recover(){
+     const fallback=image.dataset.groupFallback;
+     if(fallback){
+       delete image.dataset.groupFallback;
+       scopeLabel.hidden=false;
+       image.src=fallback;
+     }else{
+       image.hidden=true;
+       scopeLabel.hidden=true;
+     }
+   }
+   image.addEventListener('error',recover);
+   if(image.complete&&!image.naturalWidth)recover();
+ }
+}
 function classicBoard(){
  if(!state.guesses.length)return `<p class="board-empty">Seu primeiro palpite revela a comparação das propriedades.</p>`;
  const target=byId.get(state.targetId);
  const rows=[...state.guesses].reverse().map((id,i)=>{
    const m=byId.get(id), {properties}=gradeGuess(m,target);
-   return `<tr><th scope="row" class="name-col"><span class="mineral-name">${esc(m.name)}</span><span class="mineral-index">#${state.guesses.length-i}</span></th>
+   return `<tr><th scope="row" class="name-col"><span class="guess-mineral-wrap">${mineralThumbnail(m)}<span><span class="mineral-name">${esc(m.name)}</span><span class="mineral-index">#${state.guesses.length-i}</span></span></span></th>
      ${BOARD_KEYS.map(key=>cell(m,key,properties[key])).join('')}</tr>`;
  }).join('');
  return `${legend()}<p class="board-scroll-help">Deslize a tabela na horizontal para ver todas as propriedades.</p>
@@ -95,7 +122,7 @@ function challengeClues(){
 function otherBoard(){
  if(!state.guesses.length)return '';
  return `<div class="attempt-list">${state.guesses.map((id,i)=>`<div class="attempt-item ${id===state.targetId?'hit':''}">
-   <span class="attempt-number">${i+1}</span><b>${esc(byId.get(id).name)}</b><span class="attempt-status">${id===state.targetId?'Resposta do desafio':'Palpite incorreto'}</span>
+   <span class="attempt-number">${i+1}</span><span class="guess-mineral-wrap">${mineralThumbnail(byId.get(id))}<b>${esc(byId.get(id).name)}</b></span><span class="attempt-status">${id===state.targetId?'Resposta do desafio':'Palpite incorreto'}</span>
  </div>`).join('')}</div>`;
 }
 function gallery(m){
@@ -122,7 +149,9 @@ function catalogDialog(){
 function showCatalog(query=''){
  const q=normalizeText(query);
  const matches=getCatalogMinerals(MINERALS,state.difficulty).filter(m=>[m.name,m.formula,m.anionGroup,m.family,m.system,displayValue(m,'colorPPL'),...m.cations,...m.aliases].some(v=>normalizeText(v).includes(q))).sort((a,b)=>Number(b.taxonRank==='species')-Number(a.taxonRank==='species')||a.name.localeCompare(b.name,'pt-BR'));
- document.getElementById('catalog-list').innerHTML=matches.length?matches.map(m=>`<button class="catalog-item" data-catalog-id="${esc(m.id)}"><span class="catalog-name"><b>${esc(m.name)}</b><small>${esc(m.formula||'Composição variável')} · ${esc(displayValue(m,'colorPPL'))}</small></span><span class="catalog-page">${m.taxonRank==='species'?'Espécie':'Referência'}</span></button>`).join(''):'<p class="catalog-empty">Nenhum mineral encontrado.</p>';
+ const list=document.getElementById('catalog-list');
+ list.innerHTML=matches.length?matches.map(m=>`<button class="catalog-item" data-catalog-id="${esc(m.id)}">${mineralThumbnail(m)}<span class="catalog-name"><b>${esc(m.name)}</b><small>${esc(m.formula||'Composição variável')} · ${esc(displayValue(m,'colorPPL'))}</small></span><span class="catalog-page">${m.taxonRank==='species'?'Espécie':'Referência'}</span></button>`).join(''):'<p class="catalog-empty">Nenhum mineral encontrado.</p>';
+ bindThumbnails(list);
  document.getElementById('catalog-detail').innerHTML=`<p class="catalog-select">${matches.length} fichas. Selecione um mineral para consultar a ficha completa.</p>`;
 }
 function diagnosticReview(mineral, context){
@@ -141,8 +170,9 @@ function header(){
 function home(){
  const count=discoveries().length;
  const summaries=getDailyModeSummary(MINERALS,MODES,today,mode=>stored(stateKey(mode,'daily',state.difficulty,today),{}),state.difficulty);
+ const cover=getMenuCoverImage(MINERALS,today,'classic');
  return `<div class="hub">
-   <div class="hub-hero"><h1 id="home-title" tabindex="-1">Qual é o <span>mineral?</span></h1></div>
+   <div class="hub-hero"><h1 id="home-title" tabindex="-1">Qual é o <span>mineral?</span></h1>${cover?`<div class="hero-decor"><img src="${esc(cover.src)}" alt=""></div>`:''}</div>
    <section class="hub-bottom" aria-labelledby="collection-label">
      <div class="collection-summary"><h2 id="collection-label">Sua coleção mineralógica</h2><span id="collection-count">${count} de ${playable.length} identificados</span></div>
      <progress id="collection-progress" aria-labelledby="collection-label" aria-describedby="collection-count" value="${count}" max="${playable.length}"></progress>
@@ -156,13 +186,16 @@ function home(){
    <section class="hub-choices" aria-labelledby="home-games">
      <div class="hub-section-heading"><h2 id="home-games">Escolha sua partida</h2><span>Desafio #${getPuzzleNumber(today)}</span></div>
      <div class="hub-mode-grid">${summaries.map(mode=>{
+       const coverImage=getMenuCoverImage(MINERALS,today,mode.id);
        const instructions={classic:'Compare propriedades',photo:'Observe duas fotomicrografias',description:'Interprete pistas textuais'};
        const action=mode.status==='won'?'Consultar acerto':mode.status==='lost'?'Consultar resposta':
          mode.status==='playing'?`Continuar · ${attemptLabel(mode.attempts)}`:'Jogar o desafio';
        return `<button class="hub-card hub-${mode.id}" type="button" data-game-mode="${mode.id}">
-         <span class="hub-card-art-icon">${icon(mode.icon,22)}</span>
-         <span class="hub-card-copy"><b>${esc(mode.name)}</b><span class="hub-card-sub">${instructions[mode.id]}</span></span>
-         <span class="hub-card-foot">${action}</span>
+         <span class="hub-card-art" aria-hidden="true">${coverImage?`<img src="${esc(coverImage.src)}" alt="" loading="lazy">`:''}<span class="hub-card-art-icon">${icon(mode.icon,29)}</span></span>
+         <span class="hub-card-copy"><span class="hub-card-topline"><b>${esc(mode.name)}</b></span>
+           <span class="hub-card-sub">${instructions[mode.id]}</span>
+           <span class="hub-card-foot">${action} ${icon('right',16)}</span>
+         </span>
        </button>`;
      }).join('')}</div>
    </section>
@@ -187,7 +220,10 @@ function gameShell(){
    <div class="layout">${mainGame()}</div>
  </div>`;
 }
-function footer(){return `<footer class="sources"><p>Petrodle · acesso gratuito</p><div class="source-links"><span>Referência mineralógica: <a href="${GUIDE_URL}" target="_blank" rel="noopener noreferrer">FRANK, H. T. <i>Guia de Minerais Transparentes ao Microscópio Petrográfico</i>. UFRGS, 2018.</a> Fotografias para uso não comercial.</span><span>Críticas e sugestões: <a href="mailto:marquesbarros.geo@gmail.com">marquesbarros.geo@gmail.com</a></span></div></footer>`;}
+function footer(){return `<footer class="sources"><div class="source-links">
+  <span>Petrodle é um projeto de acesso livre com foco educativo. Sinta-se à vontade para colaborar! <a href="https://github.com/marquesbarros/petrodle/issues/new">Abra uma issue no GitHub</a> ou <a href="https://github.com/marquesbarros">entre em contato comigo</a>.</span>
+  <span>Referência mineralógica: <a href="${GUIDE_URL}" target="_blank" rel="noopener noreferrer">FRANK, H. T. <i>Guia de Minerais Transparentes ao Microscópio Petrográfico</i>. UFRGS, 2018.</a> Fotografias para uso não comercial.</span>
+</div></footer>`;}
 function attemptLabel(count){return `${count} ${count===1?'palpite':'palpites'}`;}
 function mainGame(){
  const game=MODES.find(m=>m.id===state.gameMode);
@@ -332,7 +368,8 @@ function showSuggestions(){
  const available=guessPool().filter(m=>!state.guesses.includes(m.id));
  suggestionItems=query?searchMinerals(available,query,9):[];
  selection=-1;
- menu.innerHTML=suggestionItems.map((m,i)=>`<button type="button" data-id="${esc(m.id)}" tabindex="-1" id="suggestion-${i}" class="suggestion" role="option" aria-selected="false"><span class="suggestion-copy"><b>${esc(m.name)}</b><small>${esc(m.family)}</small></span></button>`).join('');
+ menu.innerHTML=suggestionItems.map((m,i)=>`<button type="button" data-id="${esc(m.id)}" tabindex="-1" id="suggestion-${i}" class="suggestion" role="option" aria-selected="false">${mineralThumbnail(m)}<span class="suggestion-copy"><b>${esc(m.name)}</b><small>${esc(m.family)}</small></span></button>`).join('');
+ bindThumbnails(menu);
  menu.classList.toggle('visible',Boolean(suggestionItems.length));
  input.setAttribute('aria-expanded',String(Boolean(suggestionItems.length)));
  input.removeAttribute('aria-activedescendant');
@@ -460,6 +497,7 @@ function bind(){
  document.getElementById('close-help').addEventListener('click',()=>document.getElementById('help-dialog').close());
  document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
  for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+ bindThumbnails(root);
  bindExternalImages();
  document.querySelectorAll('[data-photo-preview]').forEach(button=>button.addEventListener('click',()=>previewPhoto(button)));
  document.getElementById('next')?.addEventListener('click',nextTraining);
