@@ -7,7 +7,7 @@ const { readGame } = require('../scripts/load-game.cjs');
 const { html } = readGame();
 const css = readFileSync(path.join(root, 'game.css'), 'utf8');
 
-assert.match(html, /<link rel="stylesheet" href="game\.css\?v=7">/,
+assert.match(html, /<link rel="stylesheet" href="game\.css\?v=8">/,
   'O tema publicado deve ser carregado pelo jogo');
 assert.match(html, /const MODES = Object\.freeze\(\[/,
   'As modalidades de jogo devem permanecer na interface');
