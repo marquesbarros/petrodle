@@ -219,7 +219,8 @@ function gameShell(){
  </div>`;
 }
 function footer(){return `<footer class="sources"><div class="source-links">
-  <span>Petrodle é um projeto de acesso livre com foco educativo. Sinta-se à vontade para colaborar! <a href="https://github.com/marquesbarros/petrodle/issues/new">Abra uma issue no GitHub</a> ou <a href="https://github.com/marquesbarros">entre em contato comigo</a>.</span>
+  <span>Petrodle é um projeto educativo independente, sem financiamento. Sinta-se à vontade para colaborar.</span>
+  <span><a href="https://github.com/marquesbarros/petrodle/blob/main/docs/REFERENCIAS.md" target="_blank" rel="noopener noreferrer">Referências do jogo</a> · <a href="https://github.com/marquesbarros/petrodle/issues/new" target="_blank" rel="noopener noreferrer">Abra uma issue no GitHub</a> ou <a href="https://marquesbarros.github.io/marquesbarros/" target="_blank" rel="noopener noreferrer">entre em contato comigo</a>.</span>
   <span>Referência mineralógica: <a href="${GUIDE_URL}" target="_blank" rel="noopener noreferrer">FRANK, H. T. <i>Guia de Minerais Transparentes ao Microscópio Petrográfico</i>. UFRGS, 2018.</a> Fotografias para uso não comercial.</span>
 </div></footer>`;}
 function attemptLabel(count){return `${count} ${count===1?'palpite':'palpites'}`;}
