@@ -298,7 +298,7 @@ function resultBanner(){
    <p>${attemptLabel(state.guesses.length)}${result.won?' · Registrado na coleção':''}</p></div></div>
    ${resultEvidence(target)}
    <div class="result-actions">
-     ${state.playMode==='training'?'<button type="button" id="next" class="solid-small">Próximo mineral</button>':''}
+     ${state.playMode==='training'?'<button type="button" id="next" class="solid-small">Próximo mineral (Enter)</button>':''}
      ${result.lost?'<a class="outline-small" href="#answer-profile" id="review-answer">Ver ficha</a>':''}
      <button type="button" class="outline-small" id="share">Compartilhar resultado</button>
    </div>
@@ -322,6 +322,7 @@ function dialogs(){
        <li><b>Descrição.</b> Interprete as pistas e mantenha abertas as hipóteses que a evidência ainda não distingue.</li>
      </ul>
      <p>Digite um nome para buscar. Selecione uma sugestão para enviar o palpite. No teclado, use ↑/↓, Enter e Esc. Repetições não contam. A cada três palpites você pode revelar uma dica, enquanto houver dicas disponíveis.</p>
+     <p>Atalhos: Tab abre ou fecha o catálogo; Shift+Tab mantém a navegação reversa. No Treino, pressione Enter após o resultado para jogar outro mineral.</p>
      <p class="dialog-note">As propriedades variam entre amostras. Alguns dados descrevem o grupo, e a espécie pode exigir análise adicional.</p>
    </div>
  </dialog>${catalogDialog()}<dialog id="photo-dialog" class="dialog photo-dialog" aria-labelledby="preview-title">
@@ -475,6 +476,14 @@ function previewPhoto(button){
  document.getElementById('preview-light').textContent=button.parentElement.querySelector('.photo-lighting').textContent;
  document.getElementById('photo-dialog').showModal();
 }
+function toggleCatalog(){
+ const dialog=document.getElementById('catalog-dialog');
+ if(dialog.open){dialog.close();return;}
+ if(document.querySelector('dialog[open]'))return;
+ dialog.showModal();
+ showCatalog();
+ document.getElementById('catalog-search').focus();
+}
 function bind(){
  document.querySelectorAll('[data-home]').forEach(button=>button.addEventListener('click',()=>{
    const focus=view==='game'?`.hub-card[data-game-mode="${state.gameMode}"]`:'#home-title';
@@ -485,11 +494,7 @@ function bind(){
  document.querySelectorAll('[data-game-mode]').forEach(el=>el.addEventListener('click',()=>changeGame(el.dataset.gameMode)));
  document.querySelectorAll('[data-run-mode]').forEach(el=>el.addEventListener('click',()=>changeRun(el.dataset.runMode)));
  document.getElementById('difficulty')?.addEventListener('change',e=>changeDifficulty(e.target.value));
- document.getElementById('catalog-link').addEventListener('click',()=>{
-   document.getElementById('catalog-dialog').showModal();
-   showCatalog();
-   document.getElementById('catalog-search').focus();
- });
+ document.getElementById('catalog-link').addEventListener('click',toggleCatalog);
  document.getElementById('close-catalog').addEventListener('click',()=>document.getElementById('catalog-dialog').close());
  document.getElementById('catalog-search').addEventListener('input',e=>showCatalog(e.target.value));
  document.getElementById('catalog-list').addEventListener('click',e=>{
@@ -607,6 +612,21 @@ function checkDay(){
  render(focus);
  return true;
 }
+document.addEventListener('keydown',event=>{
+ if(event.isComposing||event.ctrlKey||event.altKey||event.metaKey||event.repeat)return;
+ if(event.key==='Tab'&&!event.shiftKey){
+   if(document.querySelector('dialog[open]:not(#catalog-dialog)'))return;
+   event.preventDefault();
+   toggleCatalog();
+   return;
+ }
+ if(event.key==='Enter'&&view==='game'&&state.playMode==='training'&&status().ended
+     &&!document.querySelector('dialog[open]')
+     &&!event.target.closest?.('button, a, input, select, textarea, [contenteditable], [role="button"]')){
+   event.preventDefault();
+   nextTraining();
+ }
+});
 render();
 setInterval(checkDay,30000);
 window.addEventListener('focus',checkDay);
