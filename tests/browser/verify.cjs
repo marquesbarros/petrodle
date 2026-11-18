@@ -343,8 +343,21 @@ async function verify(browser, url) {
     const help = page.locator('#help-dialog');
     const helpNamed = await help.and(page.getByRole('dialog', { name: 'Como jogar' })).count() === 1;
     a11y.push(await inspectAccessibility(page, 'ajuda'));
+    await page.keyboard.press('Tab');
+    assert.equal(await help.isVisible(), true, 'Tab não deve fechar outro diálogo');
+    assert.equal(await page.locator('#catalog-dialog').isVisible(), false, 'Outro diálogo não abre o catálogo');
     await page.keyboard.press('Escape');
     assert.equal(await help.isVisible(), false);
+    await page.locator('#catalog-link').focus();
+    await page.keyboard.press('Tab');
+    const shortcutCatalog = page.locator('#catalog-dialog');
+    assert.equal(await shortcutCatalog.isVisible(), true, 'Tab abre o catálogo em qualquer tela');
+    assert.equal(await shortcutCatalog.locator('#catalog-search').evaluate(input => input === document.activeElement), true,
+      'O atalho deve deixar a busca do catálogo pronta');
+    await page.keyboard.press('Tab');
+    assert.equal(await shortcutCatalog.isVisible(), false, 'Tab fecha o catálogo aberto');
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await shortcutCatalog.isVisible(), false, 'Shift+Tab preserva a navegação reversa');
     const difficulty = page.locator('#difficulty');
     assert.equal(await difficulty.inputValue(), 'easy');
     await difficulty.selectOption('medium');
@@ -577,11 +590,25 @@ async function verifyOutcomesAndTraining(browser, url) {
         const copy = await share.locator('#share-text').inputValue();
         assert.match(copy, /^Petrodle Clássico/);
         assert.ok(!copy.includes('Calcita'), 'O texto alternativo não revela a resposta');
+        await page.keyboard.press('Enter');
+        assert.equal(await page.locator('#result-title').count(), 1,
+          'Enter em outro diálogo não pode reiniciar o treino');
         await page.keyboard.press('Escape');
         assert.equal(await page.locator('#share').evaluate(trigger => trigger === document.activeElement), true);
       }
-      await page.locator('#next').click();
+      await page.locator('#result-title').focus();
+      await page.keyboard.press('Tab');
+      assert.equal(await page.locator('#catalog-dialog').isVisible(), true, 'Tab funciona após acertar');
+      await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#result-title').count(), 1,
+        'Enter dentro do catálogo não pode iniciar outro mineral');
+      await page.keyboard.press('Tab');
+      assert.equal(await page.locator('#catalog-dialog').isVisible(), false);
+      await page.locator('#result-title').focus();
+      await page.keyboard.press('Enter');
       assert.ok(await page.locator('#guess-input').isEnabled());
+      assert.equal(await page.locator('#guess-input').evaluate(input => input === document.activeElement), true,
+        'Enter inicia um novo treino com o campo de resposta focado');
       assert.equal(await page.locator('#result-title').count(), 0);
       const restarted = await page.evaluate(mode => JSON.parse(
         localStorage.getItem(`petrodle:v6:training:${mode}:easy`),
