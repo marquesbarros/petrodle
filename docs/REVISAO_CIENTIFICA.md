@@ -4,6 +4,8 @@ Em 16/11/2026, conferimos os 15 conjuntos do Descrição Difícil e o par Dickit
 
 ## Evidência por conjunto
 
+Em 24/11/2026, o campo de associações de 125 verbetes foi recuperado da seção “Associações” do PDF de Frank (2018), nas páginas indicadas em `sourcePage` e nas fontes de cada ficha. Os textos anteriores continham frases interrompidas e, em alguns casos, trechos de legendas de fotografias. A pista de contexto agora apresenta a seção completa e a interface exibe o texto disponível sem o corte de 440 caracteres. Os escopos de espécie e de grupo registrados no catálogo orientam a interpretação dessas associações.
+
 | Alternativas | Evidência que distinguiria os candidatos | Referência |
 | --- | --- | --- |
 | Annita, Eastonita, Siderofilita | A clivagem basal e o pleocroísmo sustentam a hipótese de biotita. Para separar estas espécies, compare a composição da mica, especialmente a proporção Fe²⁺/Mg e a distribuição de Al nos sítios tetraédricos e octaédricos. | Atlas de minerais, p. 55 (PDF 62), e *Earth Materials*, §7.18 (PDF 432–433). Eastonita é uma espécie redefinida. A identidade do material histórico exige avaliação separada. [Rieder et al. (1999), nomenclatura das micas](https://doi.org/10.1180/minmag.1999.063.2.13) |

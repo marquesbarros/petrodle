@@ -451,6 +451,9 @@ async function verify(browser, url) {
     await openMode(page, 'description');
     assert.equal(await page.locator('.legend-compact').count(), 0);
     await page.locator('.description-stage .clue-row').waitFor();
+    assert.match(await page.locator('.description-stage .clue-row p').textContent(),
+      /Comum em mármores, associado a granada, diopsídio, vesuvianita e calcita\.$/,
+      'A pista inicial mostra o fim do texto completo do guia');
     for (const answer of ['Quartzo', 'Calcita', 'Muscovita']) await enterGuess(page, answer);
     assert.equal(await page.locator('.attempt-item').count(), 3);
     await page.waitForFunction(() => document.querySelector('.attempt-item .mineral-thumbnail img')?.naturalWidth > 0);

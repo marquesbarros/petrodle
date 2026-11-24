@@ -111,13 +111,13 @@ A coluna de evidência indica o que precisaria ser documentado para separar as r
 
 - **Clássico · Fácil** — nenhum nome completo detectado. 1 menções ao grupo.
 - **Clássico · Médio** — nenhum nome completo detectado. 8 menções ao grupo.
-- **Clássico · Difícil** — nenhum nome completo detectado. 54 menções ao grupo.
+- **Clássico · Difícil** — nenhum nome completo detectado. 53 menções ao grupo.
 - **Imagem · Fácil** — nenhum nome completo detectado. 0 menções ao grupo.
 - **Imagem · Médio** — nenhum nome completo detectado. 0 menções ao grupo.
 - **Imagem · Difícil** — nenhum nome completo detectado. 0 menções ao grupo.
 - **Descrição · Fácil** — nenhum nome completo detectado. 1 menções ao grupo.
 - **Descrição · Médio** — nenhum nome completo detectado. 8 menções ao grupo.
-- **Descrição · Difícil** — nenhum nome completo detectado. 49 menções ao grupo.
+- **Descrição · Difícil** — nenhum nome completo detectado. 48 menções ao grupo.
 
 ## Campos ausentes ou inaplicáveis nos alvos
 

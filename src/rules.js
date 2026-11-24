@@ -275,7 +275,7 @@ function buildProgressiveClues(mineral){
  ['Clivagem',mineral.cleavageDescription || 'Não indicada.'],
  ['Química',`Classe: ${mineral.anionGroup||'não informada'}. Fórmula: ${mineral.formula||'não individualizada'}. Principais cátions: ${mineral.cations.join(', ')||'não informados'}.`]
  ];
- return raw.map(([title,value])=>({title,value:redactMineralName(value||'Não informado no guia.',mineral).slice(0,440)}));
+ return raw.map(([title,value])=>({title,value:redactMineralName(value||'Não informado no guia.',mineral)}));
 }
 const HINT_INTERVAL=3;
 const MAX_ATTEMPTS=10;

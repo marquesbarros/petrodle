@@ -6,6 +6,16 @@ const { html } = readGame(file);
 const { getLocalDateKey, redactMineralName, buildProgressiveClues, MINERALS } = getGame(["getLocalDateKey","redactMineralName","buildProgressiveClues","MINERALS"], file);
 const { getHintClues, formatChemicalFormula } = getGame(['getHintClues', 'formatChemicalFormula'], file);
 
+const longContext = {
+  ...MINERALS.find(m => m.id === 'calcita'),
+  associations: 'Contexto geológico detalhado. '.repeat(30) + 'Calcita pode preencher veios.',
+};
+assert.equal(buildProgressiveClues(longContext)[0].value,
+  redactMineralName(longContext.associations, longContext),
+  'A pista deve mostrar o texto completo e ocultar o nome também após 440 caracteres');
+assert.equal(getHintClues(longContext, 'classic')[0].value,
+  redactMineralName(longContext.associations, longContext));
+
 for (const mode of ['classic', 'photo', 'description']) {
   const mineral = MINERALS.find(m => m.id === 'calcita');
   const clues = getHintClues(mineral, mode);

@@ -112,12 +112,9 @@ function challengeImage(){
    </figure>`).join('')}
    </div><p class="image-stage-caption">As fotos podem mostrar campos diferentes. Frank (2018).</p></div>`;
 }
-function formatClue(value){
- return value.length===440&&!/[.!?…]$/.test(value)?value.replace(/\s+\S+$/,'')+'…':value;
-}
 function challengeClues(){
  const [clue]=buildProgressiveClues(byId.get(state.targetId));
- return `<div class="description-stage"><section class="clue-row"><div><b>${esc(clue.title)}</b><p>${esc(formatClue(clue.value))}</p></div></section></div>`;
+ return `<div class="description-stage"><section class="clue-row"><div><b>${esc(clue.title)}</b><p>${esc(clue.value)}</p></div></section></div>`;
 }
 function otherBoard(){
  if(!state.guesses.length)return '';
@@ -262,7 +259,7 @@ function hintSection(){
  const shown=getHintStages(count,clues,used);
  return `<section class="hints-section" aria-label="Dicas progressivas">
    <div class="hints-heading"><h2>Dicas</h2></div>
-   ${shown.length?`<div class="hints-revealed">${shown.map(c=>`<div class="hint-entry" tabindex="-1"><p><b>${esc(c.title)}</b>${esc(c.title==='Fórmula química'?formatChemicalFormula(c.value):formatClue(c.value))}</p></div>`).join('')}</div>`:''}
+   ${shown.length?`<div class="hints-revealed">${shown.map(c=>`<div class="hint-entry" tabindex="-1"><p><b>${esc(c.title)}</b>${esc(c.title==='Fórmula química'?formatChemicalFormula(c.value):c.value)}</p></div>`).join('')}</div>`:''}
    <div class="hints-footer">${remaining?`<button type="button" id="hint" class="hint-claim">Revelar dica${remaining>1?` (${remaining} disponíveis)`:''}</button>`:
      earned>=clues.length?'<span>Todas as dicas foram reveladas.</span>':`<span>${next} ${next===1?'palpite para a próxima dica':'palpites para a próxima dica'}.</span>`}</div>
  </section>`;
