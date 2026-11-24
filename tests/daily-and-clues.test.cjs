@@ -4,6 +4,27 @@ const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
 const { readGame, getGame } = require('../scripts/load-game.cjs');
 const { html } = readGame(file);
 const { getLocalDateKey, redactMineralName, buildProgressiveClues, MINERALS } = getGame(["getLocalDateKey","redactMineralName","buildProgressiveClues","MINERALS"], file);
+const { getHintClues, formatChemicalFormula } = getGame(['getHintClues', 'formatChemicalFormula'], file);
+
+for (const mode of ['classic', 'photo', 'description']) {
+  const mineral = MINERALS.find(m => m.id === 'calcita');
+  const clues = getHintClues(mineral, mode);
+  assert.equal(clues[2].title, 'Fórmula química', 'A terceira dica deve ser a fórmula em cada modo');
+  assert.equal(clues[2].value, mineral.formula);
+  assert.equal(clues.length, mode === 'description' ? 5 : 6);
+}
+for (const [raw, formatted] of [
+  ['CaCO3', 'CaCO₃'],
+  ['Ca2[Al4Si8O24]·13H2O', 'Ca₂[Al₄Si₈O₂₄]·13H₂O'],
+  ['CaSO4.2H2O', 'CaSO₄·2H₂O'],
+  ['NaFe3+Si2O6', 'NaFe³⁺Si₂O₆'],
+  ['(Mg,Fe+3,Al)3(Si,Al)4O10(OH)2', '(Mg,Fe³⁺,Al)₃(Si,Al)₄O₁₀(OH)₂'],
+  ['Na2Fe2+3', 'Na₂Fe²⁺₃'],
+  ['KLi1.5Al1.5(Si3Al)O10F2', 'KLi₁.₅Al₁.₅(Si₃Al)O₁₀F₂'],
+  ['(Na,Ca)(Al,Si)4O8 · An30–50', '(Na,Ca)(Al,Si)₄O₈ · An30–50'],
+  ['', ''],
+  [null, ''],
+]) assert.equal(formatChemicalFormula(raw), formatted, raw);
 
 const originalTZ = process.env.TZ;
 try {

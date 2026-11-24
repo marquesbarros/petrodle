@@ -365,6 +365,10 @@ async function verify(browser, url) {
     assert.ok((await page.locator('#catalog-list button').count()) >= 45);
     await page.locator('#catalog-search').fill('FeCO3');
     await page.locator('#catalog-list button').getByText('Siderita', { exact: true }).waitFor();
+    assert.match(await page.locator('[data-catalog-id="siderita"] small').textContent(), /FeCO₃/);
+    await page.locator('#catalog-search').fill('FeCO₃');
+    await page.locator('[data-catalog-id="siderita"]').click();
+    assert.equal(await page.locator('#catalog-detail .chem-profile strong').textContent(), 'FeCO₃');
     await page.keyboard.press('Escape');
     await difficulty.selectOption('hard');
     await page.locator('#catalog-link').click();
@@ -539,10 +543,23 @@ async function verifyOutcomesAndTraining(browser, url) {
     await ready(page, url);
     for (const [mode, answer] of [['photo', 'Fluorita'], ['description', 'Epidoto']]) {
       await openMode(page, mode);
-      for (const wrong of ['Quartzo', 'Calcita', 'Muscovita', 'Barita', 'Diopsídio', 'Microclínio', 'Zircão', 'Ortoclásio']) {
+      for (const wrong of ['Quartzo', 'Calcita', 'Muscovita', 'Barita', 'Diopsídio', 'Microclínio', 'Zircão', 'Ortoclásio', 'Cianita']) {
         await enterGuess(page, wrong);
       }
-      assert.equal(await page.locator('.attempt-item').count(), 8);
+      assert.equal(await page.locator('.attempt-item').count(), 9);
+      assert.match(await page.locator('.field-label small').textContent(), /1 tentativa restante/);
+      for (let clue = 0; clue < 3; clue++) await page.locator('#hint').click();
+      const thirdClue = page.locator('.hint-entry').nth(2);
+      assert.equal(await thirdClue.locator('b').textContent(), 'Fórmula química');
+      assert.match(await thirdClue.textContent(), /[₀-₉]/);
+      await page.reload();
+      await page.locator('.hub-mode-grid').waitFor();
+      await openMode(page, mode);
+      assert.equal(await page.locator('.attempt-item').count(), 9);
+      assert.equal(await page.locator('.hint-entry').count(), 3);
+      assert.ok(await page.locator('#guess-input').isEnabled(), 'Nove erros salvos permitem continuar');
+      await enterGuess(page, 'Titanita');
+      assert.equal(await page.locator('.attempt-item').count(), 10);
       await page.locator('#result-title').filter({ hasText: answer }).waitFor();
       const input = page.locator('#guess-input');
       assert.ok(!await input.count() || !await input.isEnabled(), 'A derrota encerra os palpites');
@@ -564,6 +581,7 @@ async function verifyOutcomesAndTraining(browser, url) {
       await enterGuess(page, 'Calcita');
       await page.locator('#result-title').filter({ hasText: 'Calcita' }).waitFor();
       await page.locator('.result #answer-profile').waitFor();
+      assert.equal(await page.locator('#answer-profile .chem-profile strong').textContent(), 'CaCO₃');
       assert.equal(await page.locator('#result-title').evaluate(title => title === document.activeElement), true);
       assert.equal(await page.locator('#next, #next-result').count(), 1,
         'Treino encerrado oferece uma única ação de novo mineral');

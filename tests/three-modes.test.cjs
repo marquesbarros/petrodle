@@ -72,10 +72,14 @@ for (let day = 1; day <= 365; day++) {
 const wrong = Array.from({length: 12}, (_, i) => 'erro-' + i);
 assert.equal(getPlayableState('classic', wrong, 'alvo').lost, false,
   'Clássico continua sem limite de tentativas');
-assert.equal(getPlayableState('photo', wrong.slice(0, 8), 'alvo').lost, true,
-  'Imagem mantém oito tentativas');
-assert.equal(getPlayableState('description', wrong.slice(0, 8), 'alvo').lost, true,
-  'Descrição mantém oito tentativas');
+for (const mode of ['photo', 'description']) {
+  assert.equal(getPlayableState(mode, wrong.slice(0, 9), 'alvo').ended, false,
+    'Nove erros ainda permitem o último palpite');
+  assert.equal(getPlayableState(mode, wrong.slice(0, 10), 'alvo').lost, true,
+    'O décimo erro encerra a partida');
+  assert.equal(getPlayableState(mode, [...wrong.slice(0, 9), 'alvo'], 'alvo').won, true,
+    'Acertar na décima tentativa conta como vitória');
+}
 
 const photoStage = html.slice(html.indexOf('function challengeImage()'), html.indexOf('function challengeClues()'));
 assert.match(photoStage, /<img class="challenge-photo"/,

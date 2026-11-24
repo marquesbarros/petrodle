@@ -39,7 +39,7 @@ function readLegacyGame(html) {
 }
 
 function readGame() {
-  return getGame([...GAME_SYMBOLS, 'getDiagnosticReview']);
+  return getGame([...GAME_SYMBOLS, 'getDiagnosticReview', 'getHintClues']);
 }
 
 function fold(value) {
@@ -61,10 +61,14 @@ function listPairs(items) {
 
 function availableClues(game, mode, mineral, guessCount) {
   const clues = game.buildProgressiveClues(mineral);
-  if (mode === 'classic') return clues.slice(0, game.getAvailableHintCount(guessCount - 1));
   const firstTerminalCount = Array.from({ length: 30 }, (_, count) => count)
     .find(count => game.getPlayableState(mode, Array(count).fill('não é o alvo'), mineral.id).ended);
-  const optionalClues = firstTerminalCount === undefined ? clues.length : game.getAvailableHintCount(firstTerminalCount - 1);
+  const optionalClues = game.getAvailableHintCount((firstTerminalCount ?? guessCount) - 1);
+  if (game.getHintClues) return [
+    ...(mode === 'description' ? clues.slice(0, 1) : []),
+    ...game.getHintClues(mineral, mode).slice(0, optionalClues),
+  ];
+  if (mode === 'classic') return clues.slice(0, optionalClues);
   return clues.slice(0, optionalClues + Number(mode === 'description'));
 }
 
@@ -190,7 +194,7 @@ function collect(game) {
     }
     return entries;
   });
-  return { minerals, rounds, gaps, images, missing, duplicates, issues: [...issues].sort() };
+  return { minerals, rounds, gaps, images, missing, duplicates, formulaHint: Boolean(game.getHintClues), issues: [...issues].sort() };
 }
 
 function probeResult(response) {
@@ -268,6 +272,7 @@ function render(report, results = null) {
   lines.push('## Conjuntos indistinguíveis', '', '### Descrição · Difícil', '',
     'A revisão de referência `77bdd56` tinha 34 alvos do nível Difícil distribuídos em 15 conjuntos. '
       + `O catálogo desta auditoria tem ${hard.ambiguities.flatMap(group => group.ids).length} alvos em ${hard.ambiguities.length} conjuntos no mesmo nível.`,
+    ...(report.formulaHint ? ['', 'A fórmula de referência passou a ser a terceira dica, disponível após nove palpites. A auditoria compara todas as dicas que podem ser reveladas antes do limite de dez tentativas. Os 15 conjuntos históricos e as evidências analíticas necessárias continuam documentados na [revisão científica](REVISAO_CIENTIFICA.md). A fórmula ideal fornecida pelo jogo identifica a resposta cadastrada e deve ser interpretada no escopo indicado na ficha.'] : []),
     '', '| Alternativas no Difícil | Verbete compartilhado no guia | Evidência a rever |',
     '| --- | --- | --- |');
   for (const group of hard.ambiguities) {

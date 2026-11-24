@@ -14,7 +14,7 @@ Relatório gerado por `node scripts/audit.cjs --write`. `node scripts/audit.cjs 
 | Imagem | Difícil | 84 | 0 | 0 | 58 |
 | Descrição | Fácil | 13 | 0 | 0 | — |
 | Descrição | Médio | 40 | 0 | 0 | — |
-| Descrição | Difícil | 139 | 34 | 0 | — |
+| Descrição | Difícil | 139 | 0 | 0 | — |
 
 A coluna de pistas iguais compara as dicas disponíveis antes do fim da partida. Inclui também a pista inicial do Descrição, as duas fotos do Imagem e os campos de comparação do Clássico. A busca por nomes verifica a denominação completa ou sinônimos com pelo menos três caracteres, aceitando variações de acento e de hífen. Menções ao grupo são registradas à parte.
 
@@ -94,25 +94,12 @@ Actinolita, Aegirina, Akermanita, Albita, Allanita-(Ce), Almandina, Analcima, An
 
 ### Descrição · Difícil
 
-A revisão de referência `77bdd56` tinha 34 alvos do nível Difícil distribuídos em 15 conjuntos. O catálogo desta auditoria tem 34 alvos em 15 conjuntos no mesmo nível.
+A revisão de referência `77bdd56` tinha 34 alvos do nível Difícil distribuídos em 15 conjuntos. O catálogo desta auditoria tem 0 alvos em 0 conjuntos no mesmo nível.
+
+A fórmula de referência passou a ser a terceira dica, disponível após nove palpites. A auditoria compara todas as dicas que podem ser reveladas antes do limite de dez tentativas. Os 15 conjuntos históricos e as evidências analíticas necessárias continuam documentados na [revisão científica](REVISAO_CIENTIFICA.md). A fórmula ideal fornecida pelo jogo identifica a resposta cadastrada e deve ser interpretada no escopo indicado na ficha.
 
 | Alternativas no Difícil | Verbete compartilhado no guia | Evidência a rever |
 | --- | --- | --- |
-| Annita, Eastonita, Siderofilita | Biotita, p. 35 | A clivagem basal e o pleocroísmo sustentam a hipótese de biotita. Para separar estas espécies, compare a composição da mica, especialmente a proporção Fe²⁺/Mg e a distribuição de Al nos sítios tetraédricos e octaédricos. |
-| Chabazita-Ca, Chabazita-Na | Chabazita, p. 52 | Hábito e contexto de ocorrência orientam a hipótese de chabazita. O sufixo depende do cátion extrarreticular mais abundante em proporção atômica. Meça a composição do grão para comparar Ca, Na e K. |
-| Chamosita, Clinocloro | Clorita, p. 58 | Cor, clivagem e cores anômalas em XPL podem indicar clorita. Compare a ocupação octaédrica por Fe²⁺ e Mg para distinguir chamosita de clinocloro. |
-| Dravita, Elbaíta, Schorlita | Turmalina (Grupo), p. 199 | O reconhecimento óptico pode sustentar uma hipótese de turmalina. Separe estas espécies pela composição e pela ocupação dos sítios, incluindo Mg, Fe, Al e Li. A cor sozinha é insuficiente. |
-| Estilbita-Ca, Estilbita-Na | Estilbita, p. 87 | A associação e o hábito sustentam a hipótese de estilbita. Determine a abundância atômica de Ca e Na entre os cátions extrarreticulares. O teor de água das fórmulas representativas não distingue as espécies. |
-| Fayalita, Forsterita | Olivina, p. 146 | O relevo e a birrefringência ajudam a reconhecer olivina e podem sugerir composição. Para determinar a posição na série forsterita–fayalita, analise Mg e Fe do grão e calcule a proporção molar. |
-| Ferro-hornblenda, Magnésio-hornblenda | Hornblenda Verde, p. 116 | Pleocroísmo e clivagem podem indicar anfibólio cálcico. A classificação da hornblenda requer a composição e a distribuição de cátions pelos sítios cristalográficos, incluindo Fe²⁺ e Mg. |
-| Fluorapatita, Hidroxiapatita | Apatita, p. 20 | A distinção exige estimar a ocupação do sítio aniônico por F e OH. Um resultado sem detecção de F, isoladamente, não demonstra predominância de OH. |
-| Fluorapofilita-(K), Hidroxiapofilita-(K) | Apofilita, p. 22 | Compare a ocupação por F e OH no sítio aniônico da apofilita potássica. F e OH podem coexistir numa amostra. O hábito compartilhado não informa qual predomina. |
-| Heulandita-Ca, Heulandita-Na | Heulandita, p. 113 | As pistas sustentam a hipótese de heulandita. Compare os cátions extrarreticulares em proporção atômica para atribuir o sufixo. O número de moléculas de água nas fórmulas de referência não determina a espécie. |
-| Marialita, Meionita | Escapolita, p. 78 | As observações sustentam uma hipótese de escapolita. A composição ao longo da série pode ser estimada opticamente com medidas adequadas. Para separar estes extremos, verifique Na/Ca e as contribuições de Cl e carbonato. |
-| Monazita-(Ce), Monazita-(La), Monazita-(Nd) | Monazita, p. 135 | Meça a composição da zona analisada e determine qual terra rara predomina no sítio A. A presença de Ce, La ou Nd isoladamente não define o sufixo. |
-| Pentlandita, Pirrotita | Opacos, p. 150 | A opacidade em luz transmitida é compartilhada. Examine a fase individual em seção polida e, se necessário, quantifique Ni e a proporção metal/enxofre. Ni no agregado pode pertencer a uma fase vizinha. |
-| Polilitionita, Trilitionita | Lepidolita, p. 124 | As pistas de lepidolita não separam essas micas. Compare Li e Al octaédricos e Si e Al tetraédricos. As fórmulas dos extremos fluorados não excluem substituição F/OH em composições naturais. |
-| Pumpellyita-(Fe2+), Pumpellyita-(Fe3+), Pumpellyita-(Mg) | Pumpellyita, p. 169 | A paragênese é compatível com pumpellyita. A distinção requer composição e ocupação dos sítios, incluindo Mg e o estado de oxidação do Fe. Uma medida de Fe total não separa as duas espécies ferríferas. |
 
 A coluna de evidência indica o que precisaria ser documentado para separar as respostas. A [revisão científica](REVISAO_CIENTIFICA.md) registra as fontes e a justificativa. Os casos podem ser discutidos como hipóteses de grupo. A escolha da regra de aceitação continua pendente.
 

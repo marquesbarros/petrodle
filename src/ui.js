@@ -146,9 +146,9 @@ function catalogDialog(){
 }
 function showCatalog(query=''){
  const q=normalizeText(query);
- const matches=getCatalogMinerals(MINERALS,state.difficulty).filter(m=>[m.name,m.formula,m.anionGroup,m.family,m.system,displayValue(m,'colorPPL'),...m.cations,...m.aliases].some(v=>normalizeText(v).includes(q))).sort((a,b)=>Number(b.taxonRank==='species')-Number(a.taxonRank==='species')||a.name.localeCompare(b.name,'pt-BR'));
+ const matches=getCatalogMinerals(MINERALS,state.difficulty).filter(m=>[m.name,m.formula,formatChemicalFormula(m.formula),m.anionGroup,m.family,m.system,displayValue(m,'colorPPL'),...m.cations,...m.aliases].some(v=>normalizeText(v).includes(q))).sort((a,b)=>Number(b.taxonRank==='species')-Number(a.taxonRank==='species')||a.name.localeCompare(b.name,'pt-BR'));
  const list=document.getElementById('catalog-list');
- list.innerHTML=matches.length?matches.map(m=>`<button class="catalog-item" data-catalog-id="${esc(m.id)}">${mineralThumbnail(m)}<span class="catalog-name"><b>${esc(m.name)}</b><small>${esc(m.formula||'Composição variável')} · ${esc(displayValue(m,'colorPPL'))}</small></span><span class="catalog-page">${m.taxonRank==='species'?'Espécie':'Referência'}</span></button>`).join(''):'<p class="catalog-empty">Nenhum mineral encontrado.</p>';
+ list.innerHTML=matches.length?matches.map(m=>`<button class="catalog-item" data-catalog-id="${esc(m.id)}">${mineralThumbnail(m)}<span class="catalog-name"><b>${esc(m.name)}</b><small>${esc(formatChemicalFormula(m.formula)||'Composição variável')} · ${esc(displayValue(m,'colorPPL'))}</small></span><span class="catalog-page">${m.taxonRank==='species'?'Espécie':'Referência'}</span></button>`).join(''):'<p class="catalog-empty">Nenhum mineral encontrado.</p>';
  bindThumbnails(list);
  document.getElementById('catalog-detail').innerHTML=`<p class="catalog-select">${matches.length} fichas. Selecione um mineral para consultar a ficha completa.</p>`;
 }
@@ -160,7 +160,7 @@ function diagnosticReview(mineral, context){
  return `<section class="diagnostic-review" aria-labelledby="${headingId}"><h4 id="${headingId}">Evidência para distinguir as espécies</h4><p class="photo-scope">${esc(review.evidence)}</p><div class="catalog-source-list">${sources}</div></section>`;
 }
 function catalogDetail(m, context='catalog'){
- return `<div class="catalog-detail-header"><h3 tabindex="-1">${esc(m.name)}</h3><p>${esc(m.kind)} · ${m.playable?'Resposta possível':isGuessable(m)?'Palpite permitido (não sorteado)':'Consulta apenas'}</p>${m.parentGroup?`<p class="photo-scope">Grupo de origem: ${esc(m.parentGroup)}. ${esc(m.opticalDataScope)}</p>`:''}</div><div class="chem-profile"><strong>${esc(m.formula||'Fórmula não individualizada')}</strong><span>${esc(m.anionGroup||'Não informada')} · ${esc(m.silicateStructure||'')} · Cátions: ${esc(m.cations.join(', ')||'Não individualizados')}</span><span>Família: ${esc(m.family)} · Sistema: ${esc(m.system)} · PPL: ${esc(displayValue(m,'colorPPL'))}</span></div>${gallery(m)}<div class="catalog-properties"><section><b>PPL</b><p>${esc(m.ppl)}</p></section><section><b>XPL</b><p>${esc(m.xpl)}</p></section><section><b>Clivagem</b><p>${esc(m.cleavageDescription||'Não informada')}</p></section><section><b>Extinção</b><p>${esc(m.extinction||'Não informada')}</p></section><section><b>Maclas</b><p>${esc(m.twinningDescription||'Não informadas')}</p></section><section><b>Associações</b><p>${esc(m.associations||'Não informadas')}</p></section></div>${diagnosticReview(m, context)}<div class="catalog-source-list"><b>Fontes</b>${m.sources.map(v=>`<span>${v.url?`<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.label)}</a>`:esc(v.label)}${v.page?' · p. '+v.page:''}</span>`).join('')}</div><p class="catalog-copyright">${esc(m.opticalDataScope||'')} · ${esc(m.speciesPhotoStatus||'')}.</p>`;
+ return `<div class="catalog-detail-header"><h3 tabindex="-1">${esc(m.name)}</h3><p>${esc(m.kind)} · ${m.playable?'Resposta possível':isGuessable(m)?'Palpite permitido (não sorteado)':'Consulta apenas'}</p>${m.parentGroup?`<p class="photo-scope">Grupo de origem: ${esc(m.parentGroup)}. ${esc(m.opticalDataScope)}</p>`:''}</div><div class="chem-profile"><strong>${esc(formatChemicalFormula(m.formula)||'Fórmula não individualizada')}</strong><span>${esc(m.anionGroup||'Não informada')} · ${esc(m.silicateStructure||'')} · Cátions: ${esc(m.cations.join(', ')||'Não individualizados')}</span><span>Família: ${esc(m.family)} · Sistema: ${esc(m.system)} · PPL: ${esc(displayValue(m,'colorPPL'))}</span></div>${gallery(m)}<div class="catalog-properties"><section><b>PPL</b><p>${esc(m.ppl)}</p></section><section><b>XPL</b><p>${esc(m.xpl)}</p></section><section><b>Clivagem</b><p>${esc(m.cleavageDescription||'Não informada')}</p></section><section><b>Extinção</b><p>${esc(m.extinction||'Não informada')}</p></section><section><b>Maclas</b><p>${esc(m.twinningDescription||'Não informadas')}</p></section><section><b>Associações</b><p>${esc(m.associations||'Não informadas')}</p></section></div>${diagnosticReview(m, context)}<div class="catalog-source-list"><b>Fontes</b>${m.sources.map(v=>`<span>${v.url?`<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.label)}</a>`:esc(v.label)}${v.page?' · p. '+v.page:''}</span>`).join('')}</div><p class="catalog-copyright">${esc(m.opticalDataScope||'')} · ${esc(m.speciesPhotoStatus||'')}.</p>`;
 }
 function header(){
  return `<header class="topbar"><div class="topbar-inner"><button class="brand" type="button" data-home aria-label="Página inicial Petrodle"><span class="brand-icon">${logo}</span><span>Petro<em>dle</em></span></button><nav class="header-nav"><button id="catalog-link" class="nav-link">${icon('book',15)} Catálogo</button></nav><button class="help-button" id="help" aria-label="Como jogar">${icon('help',17)} <span>Como jogar</span></button></div></header><main class="page">`;
@@ -227,7 +227,7 @@ function attemptLabel(count){return `${count} ${count===1?'palpite':'palpites'}`
 function mainGame(){
  const game=MODES.find(m=>m.id===state.gameMode);
  const result=status(), isDaily=state.playMode==='daily', isClassic=state.gameMode==='classic';
- const remaining=8-state.guesses.length;
+ const remaining=MAX_ATTEMPTS-state.guesses.length;
  const inputNote=isClassic?'Palpites ilimitados':`${remaining} ${remaining===1?'tentativa restante':'tentativas restantes'}`;
  return `<section class="main-card" aria-label="Jogo ${esc(game.name)}">
    <div class="game-top"><div class="game-top-row">
@@ -254,7 +254,7 @@ function mainGame(){
 }
 function hintSection(){
  const count=state.guesses.length;
- const clues=buildProgressiveClues(byId.get(state.targetId)).slice(state.gameMode==='description'?1:0);
+ const clues=getHintClues(byId.get(state.targetId),state.gameMode);
  const earned=Math.min(getAvailableHintCount(count),clues.length);
  const used=Math.min(state.hintCount||0,earned);
  const remaining=earned-used;
@@ -262,7 +262,7 @@ function hintSection(){
  const shown=getHintStages(count,clues,used);
  return `<section class="hints-section" aria-label="Dicas progressivas">
    <div class="hints-heading"><h2>Dicas</h2></div>
-   ${shown.length?`<div class="hints-revealed">${shown.map(c=>`<div class="hint-entry" tabindex="-1"><p><b>${esc(c.title)}</b>${esc(formatClue(c.value))}</p></div>`).join('')}</div>`:''}
+   ${shown.length?`<div class="hints-revealed">${shown.map(c=>`<div class="hint-entry" tabindex="-1"><p><b>${esc(c.title)}</b>${esc(c.title==='Fórmula química'?formatChemicalFormula(c.value):formatClue(c.value))}</p></div>`).join('')}</div>`:''}
    <div class="hints-footer">${remaining?`<button type="button" id="hint" class="hint-claim">Revelar dica${remaining>1?` (${remaining} disponíveis)`:''}</button>`:
      earned>=clues.length?'<span>Todas as dicas foram reveladas.</span>':`<span>${next} ${next===1?'palpite para a próxima dica':'palpites para a próxima dica'}.</span>`}</div>
  </section>`;
@@ -270,7 +270,10 @@ function hintSection(){
 function resultEvidence(target){
  const parts=[];
  if(state.gameMode==='description'){
-   const key=m=>JSON.stringify(buildProgressiveClues(m).slice(0,3).map(c=>c.value));
+   const key=m=>JSON.stringify([
+     buildProgressiveClues(m)[0],
+     ...getHintClues(m,'description').slice(0,state.hintCount)
+   ].map(c=>c.value));
    const given=key(target);
    const alternatives=getEligibleForMode(MINERALS,'description',state.difficulty)
     .filter(m=>m.id!==target.id && key(m)===given);
@@ -321,7 +324,7 @@ function dialogs(){
        <li><b>Imagem.</b> Observe as duas fotomicrografias. PPL é luz polarizada plana. XPL é luz polarizada cruzada, em que podem aparecer cores de interferência.</li>
        <li><b>Descrição.</b> Interprete as pistas e mantenha abertas as hipóteses que a evidência ainda não distingue.</li>
      </ul>
-     <p>Digite um nome para buscar. Selecione uma sugestão para enviar o palpite. No teclado, use ↑/↓, Enter e Esc. Repetições não contam. A cada três palpites você pode revelar uma dica, enquanto houver dicas disponíveis.</p>
+     <p>Digite um nome para buscar. Selecione uma sugestão para enviar o palpite. No teclado, use ↑/↓, Enter e Esc. Repetições não contam. Imagem e Descrição permitem até 10 tentativas. A cada três palpites você pode revelar uma dica, enquanto houver dicas disponíveis. A terceira dica é a fórmula química.</p>
      <p>Atalhos: Tab abre ou fecha o catálogo; Shift+Tab mantém a navegação reversa. No Treino, pressione Enter após o resultado para jogar outro mineral.</p>
      <p class="dialog-note">As propriedades variam entre amostras. Alguns dados descrevem o grupo, e a espécie pode exigir análise adicional.</p>
    </div>

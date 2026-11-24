@@ -30,7 +30,7 @@ function reconcileProgress(raw, scheduled, validTargets, validGuesses, mode) {
   const guesses = hasPriorTarget && Array.isArray(prior.guesses)
     ? [...new Set(prior.guesses.filter(id => id === targetId || validGuesses.has(id)))]
     : [];
-  if (mode !== 'classic') guesses.splice(8);
+  if (mode !== 'classic') guesses.splice(MAX_ATTEMPTS);
   const winIndex = guesses.indexOf(targetId);
   if (winIndex >= 0) guesses.splice(winIndex + 1);
   const hintCount = Number.isInteger(prior.hintCount)

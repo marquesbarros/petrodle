@@ -2,6 +2,23 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { getGame } = require('../scripts/load-game.cjs');
 
+test('partidas de oito erros continuam e o progresso conserva até dez palpites', () => {
+  const { reconcileProgress, getPlayableState } = getGame(['reconcileProgress', 'getPlayableState']);
+  const guesses = Array.from({ length: 12 }, (_, i) => 'erro-' + i);
+  const allowed = new Set(['alvo', ...guesses]);
+  for (const mode of ['photo', 'description']) {
+    for (const count of [8, 9, 12]) {
+      const progress = reconcileProgress(
+        { targetId: 'alvo', guesses: guesses.slice(0, count), hintCount: 3 },
+        { id: 'alvo', version: 'v1' }, allowed, allowed, mode
+      );
+      assert.equal(progress.guesses.length, Math.min(count, 10));
+      assert.equal(getPlayableState(mode, progress.guesses, 'alvo').lost, count >= 10);
+      assert.equal(progress.hintCount, Math.floor(Math.min(count, 10) / 3));
+    }
+  }
+});
+
 test('desafio arquivado conserva seu alvo quando o catálogo ganha um mineral', () => {
   const { MINERALS, getScheduledTarget, getModeDailyId } = getGame([
     'MINERALS', 'getScheduledTarget', 'getModeDailyId'

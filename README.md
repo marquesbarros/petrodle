@@ -16,8 +16,10 @@ Jogo de identificação mineralógica desenvolvido para **revisar conhecimentos 
 | Modo | Mecânica | Tentativas |
 | --- | --- | --- |
 | Clássico | Comparação de 11 propriedades químicas, cristalográficas e ópticas | Ilimitadas |
-| Imagem | Identificação a partir de duas fotomicrografias | Até 8 |
-| Descrição | Identificação por pistas textuais | Até 8 |
+| Imagem | Identificação a partir de duas fotomicrografias | Até 10 |
+| Descrição | Identificação por pistas textuais | Até 10 |
+
+A cada três palpites, uma dica pode ser revelada. A terceira dica traz a fórmula química e fica disponível após o nono palpite. O catálogo e as fichas exibem os índices como subscritos e as cargas iônicas como sobrescritos. Partidas salvas com oito erros podem continuar até o novo limite de dez tentativas.
 
 O modo Imagem exige duas fotomicrografias nominais distintas e prioriza as combinações PPL/XPL registradas. A interface informa a iluminação quando conhecida. As duas imagens podem mostrar campos diferentes.
 

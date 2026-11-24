@@ -17,6 +17,21 @@ const COLOR_LABELS = {incolor:'Incolor',colorido:'Colorido',variável:'Variável
 function normalizeText(value) {
   return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
 }
+function formatChemicalFormula(value) {
+ const superscripts='⁰¹²³⁴⁵⁶⁷⁸⁹';
+ const subscripts='₀₁₂₃₄₅₆₇₈₉';
+ return String(value??'').split(/( · An.*)/).map((part,index)=>{
+   if(index%2)return part;
+   return part
+     .replace(/\.(?=\d+H2O\b)/g,'·')
+     .replace(/([A-Z][a-z]?)(?:(\d+)(\+|[−-](?!\d))|([+−-])(\d+))/g,
+       (_,element,number,sign,leadingSign,followingNumber)=>
+         element+(number||followingNumber).replace(/\d/g,digit=>superscripts[digit])+
+         ((sign||leadingSign)==='+'?'⁺':'⁻'))
+     .replace(/(?<=[A-Za-z)\]⁺⁻⁰¹²³⁴⁵⁶⁷⁸⁹])\d+(?:[.,]\d+)?(?:[-–]\d+(?:[.,]\d+)?)?/g,
+       number=>number.replace(/\d/g,digit=>subscripts[digit]));
+ }).join('');
+}
 function isGuessable(m) {return Boolean(m&&(m.guessable??m.playable));}
 function searchMinerals(minerals, query, max=8) {
   const q = normalizeText(query);
@@ -263,12 +278,21 @@ function buildProgressiveClues(mineral){
  return raw.map(([title,value])=>({title,value:redactMineralName(value||'Não informado no guia.',mineral).slice(0,440)}));
 }
 const HINT_INTERVAL=3;
+const MAX_ATTEMPTS=10;
+function getHintClues(mineral,mode){
+ const clues=buildProgressiveClues(mineral).slice(mode==='description'?1:0,-1);
+ clues.splice(2,0,{
+   title:'Fórmula química',
+   value:redactMineralName(mineral.formula||'Fórmula não individualizada.',mineral)
+ });
+ return clues;
+}
 function getAvailableHintCount(guesses){return Math.max(0,Math.floor(guesses/HINT_INTERVAL));}
 function getNextHintRequirement(guesses){return HINT_INTERVAL-(guesses%HINT_INTERVAL);}
 function getHintStages(_guesses,clues,requested=0){return clues.slice(0,Math.min(clues.length,Math.max(0,requested)));}
 function getPlayableState(mode,guesses,targetId){
  const won=guesses.includes(targetId);
- const lost=!won&&mode!=='classic'&&guesses.length>=8;
+ const lost=!won&&mode!=='classic'&&guesses.length>=MAX_ATTEMPTS;
  return {won,lost,ended:won||lost};
 }
 
